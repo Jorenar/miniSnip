@@ -165,7 +165,7 @@ function! s:selectPlaceholder() abort
 
   " Substitute in any backrefs
   if @s =~ '\V\^' . g:miniSnip_refmark
-    let @s = substitute(@s, '\V\^'.g:miniSnip_refmark.'\(\d\)',
+    let @s = substitute(@s, '\V\^'.g:miniSnip_refmark.'\(\d\+\)',
           \ "\\=\"\".get(s:placeholder_texts, str2nr(submatch(1)), '').\"\"", 'g')
   endif
 
