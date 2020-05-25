@@ -44,7 +44,7 @@ inside it will create the `foo` snippet, which you can access by typing
 `foo<Tab>` in insert mode.
 
 Filetype-aware snippets are also available. For example, a file called
-`main` in `~/.vim/miniSnip/java.snip` will create a `main` snippet only when
+`main` in `~/.vim/miniSnip/java/main.snip` will create a `main` snippet only when
 `filetype=java`, allowing you to add a `main` for C, `main` for C++ and so on.
 
 See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and options.
