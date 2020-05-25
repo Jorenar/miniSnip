@@ -109,6 +109,5 @@ Main differences:
   * descriptions (`:h g:miniSnip_descmark`)
   * option to change delimiters for one snippet (`:h g:miniSnip_delimChg`)
   * extending filetypes (`:h g:miniSnip_extends`)
-  * cursor at the end of snippets without placeholders, not beginning
+  * cursor at the end of snippets without placeholders, not the beginning
   * directories instead of prefixes for snippets file management
-  * option to change completion menu key
