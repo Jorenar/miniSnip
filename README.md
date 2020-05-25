@@ -62,7 +62,7 @@ See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and option
 ? HTML basic structure
 $ `{{` `}}`
 <!DOCTYPE html>
-<html lang="<{en}>">
+<html lang="{{en}}">
 <head>
   <meta charset="UTF-8">
   <title>{{Joren}}</title>
@@ -111,3 +111,4 @@ Main differences:
   * extending filetypes (`:h g:miniSnip_extends`)
   * cursor at the end of snippets without placeholders, not the beginning
   * directories instead of prefixes for snippets file management
+  * respect `expandtab`
