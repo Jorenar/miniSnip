@@ -42,7 +42,7 @@ function! miniSnip#expand() abort
     " Check for delimeters changes
     if l:content[0] =~ '^\V'.g:miniSnip_delimChg
       let l:delims = matchlist(l:content[0], '`\(.\{-}\)` `\(.\{-}\)`')
-      if !empty(l:foo)
+      if !empty(l:delims)
         let s:opening = l:delims[1]
         let s:closing = l:delims[2]
       endif
@@ -94,7 +94,7 @@ function! miniSnip#expand() abort
     if l:lns_len > 1 " get back to the last line of the snippet
       execute "normal! ".(l:lns_len - 1)."j"
     else
-      let l:last_line_len = s:begcol - strchars(s:cword)
+      let l:last_line_len += s:begcol - strchars(s:cword) - 1
     endif
 
     " Go to the end of the last line of snippet
