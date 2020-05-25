@@ -1,0 +1,237 @@
+*miniSnip*  *miniSnip.txt*  lightweight snippets
+
+Maintainer: Jorengarenar <https://joren.ga>
+License:    MIT
+
+1. Overview                    |miniSnip-overview|
+2. Examples                    |miniSnip-examples|
+3. Mappings                    |miniSnip-mappings|
+4. Configuration               |miniSnip-configuration|
+5. Miscellaneous               |miniSnip-miscellaneous|
+
+===============================================================================
+OVERVIEW                                                    *miniSnip-overview*
+
+miniSnip is lightweight and minimal snippet plugin written in Vim Script.
+
+To get started with miniSnip, in your runtime (on UNIX usually: `~/.vim`)
+create a directory called `miniSnip/all`. Then placing a file called `foo.snip`
+inside it will create the `foo` snippet, which you can access by typing
+`foo<Tab>` in insert mode.
+
+Filetype-aware snippets are also available. For example, a file called
+`main` in `~/.vim/miniSnip/java.snip` will create a `main` snippet only when
+|filetype|=java, allowing you to add a `main` for C, `main` for C++ and so on.
+
+You can also use snippets for one filetype in another (e.g. C snippets in C++).
+To do so, use |g:minSnip_extends|
+
+===============================================================================
+EXAMPLES                                                    *miniSnip-examples*
+
+-------------------------------------------------------------------------------
+>
+    ? Include header file
+    #include "<{!substitute(expand('%:t'), '\.c', '\.h', '')}>"
+<
+-------------------------------------------------------------------------------
+>
+    ? HTML basic structure
+    $ `{{` `}}`
+    <!DOCTYPE html>
+    <html lang="<{en}>">
+    <head>
+      <meta charset="UTF-8">
+      <title>{{Joren}}</title>
+      <meta name="author" content="{{~1}}">
+      <meta name="description" content="{{}}">
+      <meta name="keywords" content="{{example}}">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="{{style.css}}">
+    </head>
+    <body>
+      <{}>
+    </body>
+    </html>
+<
+-------------------------------------------------------------------------------
+>
+    SELECT <{table1}>.<{ID_1}>
+    FROM <{~1}>
+    LEFT JOIN <{table2}> ON <{~1}>.<{~2}> = <{~3}>.<{ID_2}>
+    WHERE <{~3}>.<{~4}> IS NULL
+<
+-------------------------------------------------------------------------------
+>
+    for dir in $(echo "$PATH" | tr ":" "\n" | grep -Fxv "$(dirname $0)"); do
+         [ -x "$dir/$(basename $0)" ] && exec "$dir/$(basename $0)" $@
+    done
+<
+
+===============================================================================
+MAPPINGS                                                    *miniSnip-mappings*
+
+-------------------------------------------------------------------------------
+                    *miniSnip_<Tab>*
+<Tab>               In insert mode, expand a mapping or jump to the next
+                    placeholder and enter select mode.
+                    In select mode, jump to the next placeholder.
+
+-------------------------------------------------------------------------------
+                    *miniSnip_<C-x><C-u>*
+<C-x><C-u>          Start |ins-completion| for the snippet.
+                    Can be changed with |g:miniSnip_complkey|
+
+===============================================================================
+CONFIGURATION                                          *miniSnip-configuration*
+
+-------------------------------------------------------------------------------
+                                                            *'g:miniSnip_dirs'*
+Default: '[ substitute(&rtp, ",.*", "", "")."/miniSnip" ]'
+          (which evaluates usually to `~/.vim/minSnip`)
+
+A list of directories to look for snippet files.
+
+For example to share system-wide snippets: >
+    let g:miniSnip_dir = [ '/usr/share/miniSnip', '~/.vim/miniSnip' ]
+
+-------------------------------------------------------------------------------
+                                                             *'g:miniSnip_ext'*
+Default: 'snip'
+
+Snippet filename extension.
+
+-------------------------------------------------------------------------------
+                                                         *'g:miniSnip_extends'*
+Default: '{}'
+
+Example: >
+    let g:miniSnip_extends = {
+          \ "cpp" : [ "objc", "c" ],
+          \ }
+<
+
+Filetype `C++` after loading its own snippets will look first through Objective-C
+snippets and then through C snippets (and at the end `all`). Every snippet with
+unique name will be imported.
+
+-------------------------------------------------------------------------------
+                                                         *'g:miniSnip_trigger'*
+Default: '<Tab>'
+
+Specifies which key expands snippets and jumps to the next placeholder. This
+should be specified in the same format as you would use for a |:map|.
+For example: >
+    let g:miniSnip_trigger = '<C-j>'
+<
+-------------------------------------------------------------------------------
+                                                        *'g:miniSnip_complkey'*
+Default: '<C-x><C-u>'
+
+Specifies which key starts |ins-completion| for the snippet.
+If default value is kept, sets |completefunc|. Set to empty string to disable.
+
+-------------------------------------------------------------------------------
+                                                         *'g:miniSnip_opening'*
+                                                         *'g:miniSnip_closing'*
+Defaults: '<{', '}>'
+
+The start and end delimiters of the placeholder string to use. For example,
+with the default values, a sample snippet could look like this: >
+    <!DOCTYPE html>
+    <html lang='en'>
+        <head>
+            <title><{default title}></title>
+        </head>
+        <body>
+            <{}>
+        </body>
+    </html>
+<
+
+-------------------------------------------------------------------------------
+                                                        *'g:miniSnip_evalmark'*
+Default: '!'
+
+Marks a template as meant to be executed as VimScript. With the default value,
+this looks something like: >
+    It has been <{!localtime()}> seconds since the Unix epoch
+<
+The placeholder is not selected, but instead after the evaluation the next
+placeholder is selected. This behaviour can be altered with the
+|'g:miniSnip_noskip'|.
+
+-------------------------------------------------------------------------------
+                                                          *'g:miniSnip_noskip'*
+Default: '`'
+
+By default when selecting a placeholder with the |'g:miniSnip_evalmark'| the
+next placeholder is selected after evaluation. To mark a placeholder which is
+to be evaluated so that it is selected after evaluation use the
+|'g:miniSnip_noskip'|. This way you can easily modify the value of
+the snippet.
+
+Example: >
+    <{`!strftime("%Y-%m-%d")}>
+<
+This will be expanded to the current date and select the timestamp.
+
+-------------------------------------------------------------------------------
+                                                         *'g:miniSnip_refmark'*
+Default: '~'
+
+When this is present, followed by a single digit `n`, in a placeholder that
+also starts with |'g:miniSnip_evalmark'|, it will be replaced with the `n`th
+placeholder value.
+Example: >
+    #ifndef <{INCLUDE_GUARD}>_H_
+    #define <{~1}>_H_
+
+    <{}>
+
+    #endif
+<
+This will automatically fill the `#define` line with the value entered on the
+`#ifndef` line upon jumping to it and skip to the body between include guards.
+
+-------------------------------------------------------------------------------
+                                                         *'g:miniSnip_finalOp'*
+                                                         *'g:miniSnip_finalEd'*
+Defaults: '@{', '}@'
+
+The start and end delimiters of the final placeholder string to use. While the
+normal placeholders will be dealt with in the order they appear in the snippet,
+these placeholders will be targeted last. >
+    # BEGIN FUNCTION <{}>
+    @{}@
+    # END FUNCTION <{~1}>
+<
+
+-------------------------------------------------------------------------------
+                                                        *'g:miniSnip_descmark'*
+Default: '?'
+
+When first line of snippet starts with `?` then text proceeding after becames
+the description of the snippet, shown in complete menu.
+Example: >
+    ? Shebang
+    #!/usr/bin/env sh
+<
+`Shebang` is a description of snippet and `#!/usr/bin/env sh` its actual body.
+
+-------------------------------------------------------------------------------
+                                                        *'g:miniSnip_delimChg'*
+Default: '$'
+
+If first (second if description was provided) line starts with `$`, then change
+delimeters in this snippet to strings provided between backtics, e.g.: >
+    $ `{{` `}}`
+    let foo = {{22}}
+<
+
+===============================================================================
+MISCELLANEOUS                                          *miniSnip-miscellaneous*
+
+Based on `https://github.com/joereynolds/vim-minisnip`
+
+ vim:tw=78:ts=4:ft=help:norl:
