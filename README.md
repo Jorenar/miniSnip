@@ -99,3 +99,16 @@ For more information, see [the documentation](doc/miniSnip.txt).
 ---
 
 Based on [vim-minisnip](https://github.com/joereynolds/vim-minisnip)
+
+Main differences:
+  * reference tags aren't relative, but absolute, i.e. `<{~1}>` will refer to
+    first placeholder insted to the previous, `<{~2}>` will refer to the second
+    instead of the penultimate
+  * references aren't in quotes
+  * references to bigger numbers than 9
+  * descriptions (`:h g:miniSnip_descmark`)
+  * option to change delimiters for one snippet (`:h g:miniSnip_delimChg`)
+  * extending filetypes (`:h g:miniSnip_extends`)
+  * cursor at the end of snippets without placeholders, not beginning
+  * directories instead of prefixes for snippets file management
+  * option to change completion menu key
