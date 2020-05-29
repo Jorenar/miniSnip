@@ -54,11 +54,7 @@ function! miniSnip#expand() abort
 
     let s:pattern = '\V' . s:opening . '\.\{-}' . s:closing " apply new/reseted delims
 
-    let l:lns = map(l:content, 'empty(v:val) ? v:val : l:ws.v:val') " indent
-
-    if &expandtab " replace tabs with spaces
-      let l:lns = map(l:lns, 'substitute(v:val, "\t", repeat(" ", shiftwidth()), "g")')
-    endif
+    let l:lns = l:content[:0] + map(l:content[1:], 'empty(v:val) ? v:val : l:ws.v:val') " indent
 
     " Go to the position at the beginning of the snippet
     execute 'normal! '.(s:begcol - strchars(s:cword)).'|'
@@ -73,32 +69,25 @@ function! miniSnip#expand() abort
       let l:keepEndOfLine = 0
     endif
 
-    let l:lns_len = len(l:lns)
-
-    call append(line('.'), l:lns) " insert the snippet
+    " Insert snippet
+    execute "normal! a" . l:lns[0]
+    if !empty(l:lns[1:])
+      execute "normal! a\<CR>"
+      for l in l:lns[1:-2]
+        execute "normal! i" . l . "\<CR>"
+      endfor
+      execute "normal! i" . l:lns[-1]
+    endif
 
     if l:keepEndOfLine == 1 " add the end of the line after the snippet
-      execute 'normal! ' . l:lns_len . 'j'
       call append((line('.')), l:endOfLine)
       join!
-      execute 'normal! ' . l:lns_len . 'k'
     endif
 
-    if strchars(l:ws) > 0 " remove the padding of the first line of the snippet
-      execute 'normal! j0' . strchars(l:ws) . '"_xk$'
-    endif
-    join!
-
-    let l:last_line_len = len(l:lns[lns_len - 1])
-
-    if l:lns_len > 1 " get back to the last line of the snippet
-      execute "normal! ".(l:lns_len - 1)."j"
-    else
-      let l:last_line_len += s:begcol - strchars(s:cword) - 1
-    endif
-
-    " Go to the end of the last line of snippet
+    " Go to the end of the last line of the snippet
+    let l:last_line_len = len(l:lns[-1]) + s:begcol - strchars(s:cword) - 1
     execute 'normal! '.l:last_line_len.'|'
+
   else
     " Make sure '< mark is set so the normal command won't error out.
     if getpos("'<") == [0, 0, 0, 0]
