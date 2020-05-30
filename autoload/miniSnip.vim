@@ -70,14 +70,10 @@ function! miniSnip#expand() abort
     endif
 
     " Insert snippet
-    execute "normal! a" . l:lns[0]
-    if !empty(l:lns[1:])
-      execute "normal! a\<CR>"
-      for l in l:lns[1:-2]
-        execute "normal! i" . l . "\<CR>"
-      endfor
-      execute "normal! i" . l:lns[-1]
-    endif
+    for l in l:lns
+      execute "normal! a" . l . "\<CR>"
+    endfor
+    normal! "_dd
 
     if l:keepEndOfLine == 1 " add the end of the line after the snippet
       call append((line('.')), l:endOfLine)
