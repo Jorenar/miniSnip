@@ -26,16 +26,25 @@ Filetype-aware snippets are also available. For example, a file called
 You can also use snippets for one filetype in another (e.g. C snippets in C++).
 To do so, use |g:minSnip_extends|
 
+Features:
+  * default values of placeholders (e.g. `<{example}>`)
+  * references to previous tags (e.g. `<{~2}>` refers to second placeholder)
+  * evaluation of Vim functions (e.g. `<{!expand('%')}>`)
+  * |ins-completion| function
+  * `@{}@` can be used as `$0` in UltiSnips (but also for making "second run")
+  * filetype-aware snippets
+  * changing delimeters, snippet file filetype etc. (|miniSnip-configuration|)
+
 ===============================================================================
 EXAMPLES                                                    *miniSnip-examples*
 
 -------------------------------------------------------------------------------
->
+ c/incl.snip >
     ? Include header file
     #include "<{!substitute(expand('%:t'), '\.c', '\.h', '')}>"
 <
 -------------------------------------------------------------------------------
->
+ html/html.snip >
     ? HTML basic structure
     $ `{{` `}}`
     <!DOCTYPE html>
@@ -55,14 +64,14 @@ EXAMPLES                                                    *miniSnip-examples*
     </html>
 <
 -------------------------------------------------------------------------------
->
+ sql/join_no_match.snip >
     SELECT <{table1}>.<{ID_1}>
     FROM <{~1}>
     LEFT JOIN <{table2}> ON <{~1}>.<{~2}> = <{~3}>.<{ID_2}>
     WHERE <{~3}>.<{~4}> IS NULL
 <
 -------------------------------------------------------------------------------
->
+ sh/wrapper_exec.snip >
     for dir in $(echo "$PATH" | tr ":" "\n" | grep -Fxv "$(dirname $0)"); do
          [ -x "$dir/$(basename $0)" ] && exec "$dir/$(basename $0)" $@
     done

@@ -49,6 +49,16 @@ Filetype-aware snippets are also available. For example, a file called
 
 See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and options.
 
+## Features
+
+  * default values of placeholders (e.g. `<{example}>`)
+  * references to previous tags (e.g. `<{~2}>` refers to second placeholder)
+  * evaluation of Vim functions (e.g. `<{!expand('%')}>`)
+  * ins-completion function
+  * `@{}@` can be used as `$0` in UltiSnips (but also for making "second run")
+  * filetype-aware snippets
+  * changing delimeters, snippet file filetype etc. (`:h miniSnip-configuration`)
+
 ## Examples
 
 * `c/incl.snip`
