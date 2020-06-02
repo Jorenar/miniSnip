@@ -190,7 +190,8 @@ This will be expanded to the current date and select the timestamp.
 Default: '~'
 
 When this is present, followed by number `N` in a placeholder, it will
-be replaced with the `N`th placeholder's value.
+be replaced with the `N`th normal (i.e. not eval or another reference)
+placeholder's value.
 Example: >
     #ifndef <{INCLUDE_GUARD}>_H_
     #define <{~1}>_H_

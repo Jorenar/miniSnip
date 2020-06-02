@@ -1,5 +1,3 @@
-let s:placeholder_texts = []
-
 let s:opening = g:miniSnip_opening
 let s:closing = g:miniSnip_closing
 
@@ -25,9 +23,8 @@ endfunction
 
 function! miniSnip#expand() abort
   if exists('s:snippetfile')
-    " Reset placeholder text history (for backrefs)
-    let s:placeholder_texts = []
-    let s:placeholder_text  = ''
+    " Reset placeholder count (for backrefs)
+    let s:placeholders_count = 0
 
     " Adjust the indentation, use the current line as reference
     let l:ws = matchstr(getline(line('.')), '^\s\+')
@@ -72,7 +69,7 @@ function! miniSnip#expand() abort
     " Insert snippet
     for l in l:lns
       execute "normal! a" . l . "\<CR>"
-    endfor
+    endfor " and then remove last new (blank) line
     normal! "_dd
 
     if l:keepEndOfLine == 1 " add the end of the line after the snippet
@@ -90,10 +87,11 @@ function! miniSnip#expand() abort
       call setpos("'<", getpos('.'))
     endif
 
-    " Save the current placeholder's text so it can be backref
+    " Replace refernces to this placeholder with its text
     let l:old_s = @s
     normal! "syv`<
-    let s:placeholder_text = @s
+    let s:placeholders_count += 1
+    silent! execute '%s/\V'.s:opening.g:miniSnip_refmark.s:placeholders_count.s:closing.'/'.@s.'/g'
     let @s = l:old_s
   endif
 
@@ -134,10 +132,8 @@ function! s:selectPlaceholder() abort
     let &wrapscan = l:ws
   endtry
 
-  call add(s:placeholder_texts, s:placeholder_text)
-
   let l:skip = 0
-  if @s =~ '\V\^' . g:miniSnip_evalmark . '\|' . g:miniSnip_refmark
+  if @s =~ '\V\^' . g:miniSnip_evalmark
     let l:skip = 1
   elseif @s =~ '\V\^' . g:miniSnip_noskip . g:miniSnip_evalmark
     let @s=substitute(@s, '\V\^' . g:miniSnip_noskip , '', '')
@@ -146,12 +142,6 @@ function! s:selectPlaceholder() abort
   " If this placeholder marked as 'evaluate'
   if @s =~ '\V\^' . g:miniSnip_evalmark
     let @s = eval(substitute(@s, '\V\^' . g:miniSnip_evalmark, '', ''))
-  endif
-
-  " Substitute in any backrefs
-  if @s =~ '\V\^' . g:miniSnip_refmark
-    let @s = substitute(@s, '\V\^'.g:miniSnip_refmark.'\(\d\+\)',
-          \ "\\=\"\".get(s:placeholder_texts, str2nr(submatch(1)), '').\"\"", 'g')
   endif
 
   if empty(@s)
