@@ -59,8 +59,8 @@ function! miniSnip#expand() abort
     execute 'normal! '.strchars(s:cword).'"_x'
 
     if virtcol('.') >= (s:begcol - strchars(s:cword)) " there is something following the snippet
-      let l:keepEndOfLine = 1
       let l:endOfLine = strpart(getline(line('.')), (col('.') - 1))
+      let l:keepEndOfLine = len(l:endOfLine) > 0
       normal! "_D
     else
       let l:keepEndOfLine = 0
@@ -72,7 +72,11 @@ function! miniSnip#expand() abort
     endfor " and then remove last new (blank) line
     normal! "_dd
 
-    if l:keepEndOfLine == 1 " add the end of the line after the snippet
+    if line('.') != line('$') " get back to last line of snippet
+      normal! k
+    endif
+
+    if l:keepEndOfLine " add the end of the line after the snippet
       call append((line('.')), l:endOfLine)
       join!
     endif
