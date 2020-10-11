@@ -102,7 +102,7 @@ Default: '[ substitute(&rtp, ",.*", "", "")."/miniSnip" ]'
 A list of directories to look for snippet files.
 
 For example to share system-wide snippets: >
-    let g:miniSnip_dir = [ '/usr/share/miniSnip', '~/.vim/miniSnip' ]
+    let g:miniSnip_dirs = [ '/usr/share/miniSnip', '~/.vim/miniSnip' ]
 
 -------------------------------------------------------------------------------
                                                              *'g:miniSnip_ext'*
