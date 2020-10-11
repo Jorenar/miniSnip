@@ -11,7 +11,7 @@ function! miniSnip#trigger(...) abort
   let s:begcol = virtcol('.')
 
   let l:dirs = join(s:directories(), ',')
-  let l:all = globpath(l:dirs, s:cword.'.snip', 0, 1)
+  let l:all = globpath(l:dirs, s:cword.'.'.g:miniSnip_ext, 0, 1)
 
   if len(l:all) > 0
     let s:snippetfile = l:all[0]
@@ -178,7 +178,7 @@ function! miniSnip#completeFunc(findstart, base) abort
 
   " Load all snippets that match.
   let l:dirs = join(s:directories(), ',')
-  let l:all = globpath(l:dirs, a:base.'*.snip', 0, 1)
+  let l:all = globpath(l:dirs, a:base.'*.'.g:miniSnip_ext, 0, 1)
   call filter(l:all, {_, path -> filereadable(path)})
   call map(l:all, funcref('s:buildComp'))
   call sort(l:all, 'i')
