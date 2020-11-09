@@ -163,7 +163,7 @@ function! s:selectPlaceholder() abort
     call s:replaceRefs()
     call s:selectPlaceholder()
   else " paste the placeholder's default value in and enter select mode on it
-    exec 'normal! "_d'.s:ph_begin.'|xi'.l:s."\<Esc>v".s:ph_begin."|\<C-g>"
+    exec 'normal! "_d'.s:ph_begin.'|xi'.l:s."\<Esc>v".s:ph_begin."|o\<C-g>"
   endif
 endfunction
 
