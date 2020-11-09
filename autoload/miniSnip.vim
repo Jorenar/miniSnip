@@ -1,175 +1,201 @@
-let s:opening = g:miniSnip_opening
-let s:closing = g:miniSnip_closing
+" Global variables:
+"   s:pattern
+"   s:pattern_final
+"   s:op
+"   s:ed
+"   s:begcol
+"   s:ph_begin
+"   s:placeholders_count
 
-let s:pattern = '\V' . s:opening . '\.\{-}' . s:closing
-let s:final_pattern = '\V' . g:miniSnip_finalOp . '\.\{-}' . g:miniSnip_finalEd
+let s:pattern  = ""
 
-function! miniSnip#trigger(...) abort
-  let s:ins = a:0
-  silent! unlet! s:snippetfile
-  let s:cword = matchstr(getline('.'), '\v\f+%' . col('.') . 'c')
-  let s:begcol = virtcol('.')
+function! miniSnip#trigger() abort
+  let l:cword = matchstr(getline('.'), '\v\f+%' . col('.') . 'c')
 
-  let l:dirs = join(s:directories(), ',')
-  let l:all = globpath(l:dirs, s:cword.'.'.g:miniSnip_ext, 0, 1)
+  let s:begcol = col('.') - len(l:cword)
 
-  if len(l:all) > 0
-    let s:snippetfile = l:all[0]
-    return 1
+  let l:files = globpath(join(s:directories(), ','), l:cword.'.'.g:miniSnip_ext, 0, 1)
+
+  let l:file = "''"
+  if len(l:files) > 0
+    let l:file = "'".l:files[0]."'"
+  elseif !search(s:pattern)
+    return eval('"' . escape(g:miniSnip_trigger, '\"<') . '"')
   endif
 
-  return search(s:pattern . '\|' . s:final_pattern, 'e')
+  return "\<Esc>:call miniSnip#expand(" . l:file . ")\<CR>"
 endfunction
 
-function! miniSnip#expand() abort
-  if exists('s:snippetfile')
-    " Reset placeholder count (for backrefs)
-    let s:placeholders_count = 0
+function! s:updatePattern(str) abort
+  let l:custom = 0
 
-    " Adjust the indentation, use the current line as reference
-    let l:ws = matchstr(getline(line('.')), '^\s\+')
-
-    let l:content = readfile(s:snippetfile)
-
-    " Remove description
-    if l:content[0] =~ '^'.g:miniSnip_descmark
-      call remove(l:content, 0)
+  " Check for delimeters changes
+  if a:str =~ '^\V'.g:miniSnip_delimChg
+    let l:custom = 1
+    let l:delims = matchlist(a:str, "\v`(.{-})` `(.{-})`")
+    if !empty(l:delims)
+      let s:op = l:delims[1]
+      let s:ed = l:delims[2]
     endif
-
-    " Check for delimeters changes
-    if l:content[0] =~ '^\V'.g:miniSnip_delimChg
-      let l:delims = matchlist(l:content[0], '`\(.\{-}\)` `\(.\{-}\)`')
-      if !empty(l:delims)
-        let s:opening = l:delims[1]
-        let s:closing = l:delims[2]
-      endif
-      call remove(l:content, 0)
-    else " reset delims
-      let s:opening = g:miniSnip_opening
-      let s:closing = g:miniSnip_closing
-    endif
-
-    let s:pattern = '\V' . s:opening . '\.\{-}' . s:closing " apply new/reseted delims
-
-    let l:lns = l:content[:0] + map(l:content[1:], 'empty(v:val) ? v:val : l:ws.v:val') " indent
-
-    " Go to the position at the beginning of the snippet
-    execute 'normal! '.(s:begcol - strchars(s:cword)).'|'
-    " Delete the snippet
-    execute 'normal! '.strchars(s:cword).'"_x'
-
-    if virtcol('.') >= (s:begcol - strchars(s:cword)) " there is something following the snippet
-      let l:endOfLine = strpart(getline(line('.')), (col('.') - 1))
-      let l:keepEndOfLine = len(l:endOfLine) > 0
-      normal! "_D
-    else
-      let l:keepEndOfLine = 0
-    endif
-
-    " Insert snippet
-    for l in l:lns
-      execute "normal! a" . l . "\<CR>"
-    endfor " and then remove last new (blank) line
-    normal! "_dd
-
-    if line('.') != line('$') " get back to last line of snippet
-      normal! k
-    endif
-
-    if l:keepEndOfLine " add the end of the line after the snippet
-      call append((line('.')), l:endOfLine)
-      join!
-    endif
-
-    " Go to the end of the last line of the snippet
-    let l:last_line_len = len(l:lns[-1]) + s:begcol - strchars(s:cword) - 1
-    execute 'normal! '.l:last_line_len.'|'
-
-  else
-    " Make sure '< mark is set so the normal command won't error out.
-    if getpos("'<") == [0, 0, 0, 0]
-      call setpos("'<", getpos('.'))
-    endif
-
-    " Replace refernces to this placeholder with its text
-    let l:old_s = @s
-    normal! "syv`<
-    let s:placeholders_count += 1
-    silent! execute '%s/\V'.s:opening.g:miniSnip_refmark.s:placeholders_count.s:closing.'/'.@s.'/g'
-    let @s = l:old_s
+  else " reset delims
+    let s:op = g:miniSnip_opening
+    let s:ed = g:miniSnip_closing
   endif
 
-  " jump to the first/next placeholder
-  call s:selectPlaceholder()
+  " Apply delims
+  let s:pattern = '\V\(' . s:op . '\[^' . g:miniSnip_finalTag . ']\{-}' . s:ed . '\)'
+  let s:pattern_final = '\V\(' . s:op . g:miniSnip_finalTag . s:ed . '\)'
+
+  return l:custom
+endfunction
+
+function! s:insertFile(snipfile) abort
+  " Adjust the indentation, use the current line as reference
+  let l:ws = matchstr(getline(line('.')), '^\s\+')
+
+  let l:content = readfile(a:snipfile)
+
+  " Remove description
+  if l:content[0] =~ '^'.g:miniSnip_descmark
+    call remove(l:content, 0)
+  endif
+
+  " If custom delims were applied, remove line with them
+  if s:updatePattern(l:content[0])
+    call remove(l:content, 0)
+  endif
+
+  let l:lns = l:content[:0] + map(l:content[1:], 'empty(v:val) ? v:val : l:ws.v:val') " indent
+
+  " Delete snippet name
+  execute 'normal! "_d'.s:begcol.'|x'
+
+  if virtcol('.') >= s:begcol " there is something following the snippet
+    let l:endOfLine = strpart(getline('.'), col('.')-1)
+    normal! "_D
+  endif
+
+  " Insert snippet
+  for l in l:lns
+    execute "normal! a" . l . "\<CR>"
+  endfor " and then remove last new (blank) line
+  normal! "_dd
+
+  if line('.') != line('$') " get back to last line of snippet
+    normal! k
+  endif
+
+  if exists("l:endOfLine") " add the end of the line after the snippet
+    call append((line('.')), l:endOfLine)
+    join!
+  endif
+
+  " Go to the end of the last line of the snippet
+  let l:last_line_len = len(l:lns[-1]) + s:begcol - 1
+  execute 'normal! '.l:last_line_len.'|'
+
+endfunction
+
+function! s:replaceRefs() abort
+  let l:s = getline('.')[s:ph_begin-1 : col('.')-1]
+  let s:placeholders_count += 1
+  let l:pos = getpos('.')
+  silent! execute '%s/\V'.s:op.g:miniSnip_refmark.s:placeholders_count.s:ed.'/'.l:s.'/g'
+  call setpos('.', l:pos)
+  unlet s:ph_begin
+endfunction
+
+function! miniSnip#expand(snipfile) abort
+  if !empty(a:snipfile)
+    let s:placeholders_count = 0 " reset/init placeholder count (for refs)
+    if exists("s:ph_begin") | unlet s:ph_begin | endif
+    call s:insertFile(a:snipfile)
+  endif
+
+  if exists("s:ph_begin")
+    call s:replaceRefs()
+  endif
+
+  call s:selectPlaceholder() " jump to the first/next placeholder
+endfunction
+
+function! s:evaluate(str) abort
+  if a:str =~ '\V\^' . g:miniSnip_evalmark
+    return eval(a:str[1:])
+  elseif a:str =~ '\V\^' . g:miniSnip_noskip . g:miniSnip_evalmark
+    return eval(a:str[2:])
+  endif
+  return a:str
 endfunction
 
 function! s:selectPlaceholder() abort
-  let l:old_s = @s
+  let s:ph_begin = searchpos(s:pattern, 'pw')[1]
 
-  " Get the contents of the placeholder
-  "  /e in case the cursor is already on it (e.g. when a snippet begins with a placeholder)
-  "  keeppatterns to avoid clobbering the search history/highlighting all the other placeholders
-  try
-    " gn misbehaves when 'wrapscan' isn't set (see vim's #1683)
-    let [l:ws, &wrapscan] = [&wrapscan, 1]
-    silent keeppatterns execute 'normal! /' . s:pattern . "/e\<cr>gn\"sy"
-    let l:slen = len(@s) " save length of entire placeholder for reference later
-    " Remove the start and end delimiters
-    let @s=substitute(@s, '\V' . s:opening, '', '')
-    let @s=substitute(@s, '\V' . s:closing, '', '')
-  catch /E486:/
-    " There's no normal placeholder at all
-    try
-      silent keeppatterns execute 'normal! /' . s:final_pattern . "/e\<cr>gn\"sy"
-      let l:slen = len(@s) " save length of entire placeholder for reference later
-      " Remove the start and end delimiters
-      let @s=substitute(@s, '\V' . g:miniSnip_finalOp, '', '')
-      let @s=substitute(@s, '\V' . g:miniSnip_finalEd, '', '')
-    catch /E486:/
-      " There's no placeholder at all, enter insert mode
+  let l:s = ""
+
+  if s:ph_begin
+    let l:ph_body_end = searchpos(s:pattern, 'cepwz')[1] - 1 - len(s:ed)
+    let l:s = getline('.')[s:ph_begin-1+len(s:op) : l:ph_body_end]
+  else
+    let s:ph_begin = searchpos(s:pattern_final, 'pw')[1]
+    if s:ph_begin
+      let g:foo = 1
+      call searchpos(s:pattern_final, 'cepwz')
+    else
+      unlet s:ph_begin
       call feedkeys('a', 'n')
       return
-    finally
-      let &wrapscan = l:ws
-    endtry
-  finally
-    let &wrapscan = l:ws
-  endtry
-
-  let l:skip = 0
-  if @s =~ '\V\^' . g:miniSnip_evalmark
-    let l:skip = 1
-  elseif @s =~ '\V\^' . g:miniSnip_noskip . g:miniSnip_evalmark
-    let @s=substitute(@s, '\V\^' . g:miniSnip_noskip , '', '')
+    endif
   endif
 
-  " If this placeholder marked as 'evaluate'
-  if @s =~ '\V\^' . g:miniSnip_evalmark
-    let @s = eval(substitute(@s, '\V\^' . g:miniSnip_evalmark, '', ''))
-  endif
+  let l:skip = l:s =~ '\V\^' . g:miniSnip_evalmark
+  let l:s = s:evaluate(l:s)
 
-  if empty(@s)
-    " The placeholder was empty, so just enter insert mode directly
-    normal! gv"_d
-    call feedkeys(col("'>") - l:slen >= col('$') - 1 ? 'a' : 'i', 'n')
-  elseif l:skip == 1
-    normal! gv"sp
-    let @s = l:old_s
+  if empty(l:s) " the placeholder was empty, so just enter insert mode directly
+    exec 'normal! "_d'.s:ph_begin.'|x'
+    startinsert
+    if col('.') == s:ph_begin - 1
+      call feedkeys("\<Right>", 'i')
+    endif
+  elseif l:skip
+    " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
+    exec 'normal! "_d'.s:ph_begin.'|xi'.l:s
+    call s:replaceRefs()
     call s:selectPlaceholder()
-  else
-    " Paste the placeholder's default value in and enter select mode on it
-    execute "normal! gv\"spgv\<C-g>"
+  else " paste the placeholder's default value in and enter select mode on it
+    exec 'normal! "_d'.s:ph_begin.'|xi'.l:s."\<Esc>v".s:ph_begin."|\<C-g>"
+  endif
+endfunction
+
+function! s:directories() abort
+  let l:filetypes = []
+
+  if !empty(&ft)
+    let l:filetypes = [ &ft ]
+    if has_key(g:miniSnip_extends, &ft)
+      let l:filetypes += g:miniSnip_extends[&ft]
+    endif
   endif
 
-  let @s = l:old_s
+  let l:filetypes += [ "all" ]
+
+  let l:dirs = []
+
+  for l:dir in g:miniSnip_dirs
+    let l:dirs += map(l:filetypes, {_, val -> l:dir.'/'.val})
+  endfor
+
+  return l:dirs
 endfunction
+
+" --- Completion
 
 function! miniSnip#completeFunc(findstart, base) abort
   if a:findstart
     " Locate the start of the word
     let l:line = getline('.')
     let l:start = col('.') - 1
-    while l:start > 0 && l:line[l:start - 1] =~ '\a'
+    while l:start > 0 && l:line[l:start - 1] =~ '\S'
       let l:start -= 1
     endwhile
 
@@ -217,27 +243,6 @@ function! s:buildComp(_, path) abort
         \ 'info':  join(l:content, "\n"),
         \ 'kind':  's',
         \ }
-endfunction
-
-function! s:directories() abort
-  let l:filetypes = []
-
-  if !empty(&ft)
-    let l:filetypes = [ &ft ]
-    if has_key(g:miniSnip_extends, &ft)
-      let l:filetypes += g:miniSnip_extends[&ft]
-    endif
-  endif
-
-  let l:filetypes += [ "all" ]
-
-  let l:dirs = []
-
-  for l:dir in g:miniSnip_dirs
-    let l:dirs += map(l:filetypes, {_, val -> l:dir.'/'.val})
-  endfor
-
-  return l:dirs
 endfunction
 
 " vim: fen sw=2

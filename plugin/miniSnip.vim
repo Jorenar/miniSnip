@@ -16,20 +16,15 @@ let g:miniSnip_opening  = get(g:, 'miniSnip_opening',  '<{')
 let g:miniSnip_closing  = get(g:, 'miniSnip_closing' , '}>')
 let g:miniSnip_refmark  = get(g:, 'miniSnip_refmark',  '~' )
 let g:miniSnip_evalmark = get(g:, 'miniSnip_evalmark', '!' )
-let g:miniSnip_finalOp  = get(g:, 'miniSnip_finalOp',  '@{')
-let g:miniSnip_finalEd  = get(g:, 'miniSnip_finalEd',  '}@')
+let g:miniSnip_finalTag = get(g:, 'miniSnip_finalTag', '@' )
 let g:miniSnip_noskip   = get(g:, 'miniSnip_noskip',   '`' )
 
-inoremap <script> <expr> <Plug>(miniSnip-next) miniSnip#trigger(1) ?
-      \"x\<BS>\<Esc>:call \miniSnip#expand()\<CR>" :
-      \eval('"' . escape(g:miniSnip_trigger, '\"<') . '"')
-snoremap <script> <expr> <Plug>(miniSnip-next) miniSnip#trigger() ?
-      \"\<Esc>:call \miniSnip#expand()\<CR>" :
-      \eval('"' . escape(g:miniSnip_trigger, '\"<') . '"')
+inoremap <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
+snoremap <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
 
 if !empty(g:miniSnip_trigger)
-  execute "imap <unique> ".g:miniSnip_trigger." <Plug>(miniSnip-next)"
-  execute "smap <unique> ".g:miniSnip_trigger." <Plug>(miniSnip-next)"
+  execute "imap <unique> ".g:miniSnip_trigger." <Plug>(miniSnip)"
+  execute "smap <unique> ".g:miniSnip_trigger." <Plug>(miniSnip)"
 endif
 
 if g:miniSnip_complkey == '<C-x><C-u>'
