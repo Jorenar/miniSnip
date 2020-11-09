@@ -68,7 +68,7 @@ function! s:insertFile(snipfile) abort
   let l:lns = l:content[:0] + map(l:content[1:], 'empty(v:val) ? v:val : l:ws.v:val') " indent
 
   " Delete snippet name
-  execute 'normal! "_d'.s:begcol.'|x'
+  exec 'normal! "_d'.s:begcol.'|"_x'
 
   if virtcol('.') >= s:begcol " there is something following the snippet
     let l:endOfLine = strpart(getline('.'), col('.')-1)
@@ -151,19 +151,21 @@ function! s:selectPlaceholder() abort
   let l:skip = l:s =~ '\V\^' . g:miniSnip_evalmark
   let l:s = s:evaluate(l:s)
 
+  " Delete placeholder
+  exec 'normal! "_d'.s:ph_begin.'|"_x'
+
   if empty(l:s) " the placeholder was empty, so just enter insert mode directly
-    exec 'normal! "_d'.s:ph_begin.'|x'
     startinsert
     if col('.') == s:ph_begin - 1
       call feedkeys("\<Right>", 'i')
     endif
   elseif l:skip
     " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
-    exec 'normal! "_d'.s:ph_begin.'|xi'.l:s
+    exec 'normal! i'.l:s
     call s:replaceRefs()
     call s:selectPlaceholder()
   else " paste the placeholder's default value in and enter select mode on it
-    exec 'normal! "_d'.s:ph_begin.'|xi'.l:s."\<Esc>v".s:ph_begin."|o\<C-g>"
+    exec 'normal! i' . l:s . "\<Esc>v" . s:ph_begin . "|o\<C-g>"
   endif
 endfunction
 
