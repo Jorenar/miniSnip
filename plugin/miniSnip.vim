@@ -16,11 +16,11 @@ let g:miniSnip_opening  = get(g:, 'miniSnip_opening',  '<{')
 let g:miniSnip_closing  = get(g:, 'miniSnip_closing' , '}>')
 let g:miniSnip_refmark  = get(g:, 'miniSnip_refmark',  '~' )
 let g:miniSnip_evalmark = get(g:, 'miniSnip_evalmark', '!' )
-let g:miniSnip_finalTag = get(g:, 'miniSnip_finalTag', '@' )
+let g:miniSnip_finalTag = get(g:, 'miniSnip_finalTag', '+' )
 let g:miniSnip_noskip   = get(g:, 'miniSnip_noskip',   '`' )
 
-inoremap <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
-snoremap <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
+inoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
+snoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
 
 if !empty(g:miniSnip_trigger)
   execute "imap <unique> ".g:miniSnip_trigger." <Plug>(miniSnip)"

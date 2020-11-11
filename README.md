@@ -55,9 +55,9 @@ See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and option
   * references to previous tags (e.g. `<{~2}>` refers to second placeholder)
   * evaluation of Vim functions (e.g. `<{!expand('%')}>`)
   * ins-completion function
-  * `<{@}>` can be used as `$0` in UltiSnips
+  * `<{+}>` will be targeted last (equivalent of `$0` in UltiSnips)
   * filetype-aware snippets
-  * changing delimeters, snippet file filetype etc. (`:h miniSnip-configuration`)
+  * changing delimiters, snippet file filetype etc. (`:h miniSnip-configuration`)
 
 ## Examples
 
@@ -122,4 +122,4 @@ Main differences:
   * cursor at the end of snippets without placeholders, not the beginning
   * directories instead of prefixes for snippets file management
   * respect `expandtab`
-  * one final placeholder (`:h g:miniSnip_finalTag`) instead of final delimeters
+  * one final placeholder (`:h g:miniSnip_finalTag`) instead of final delimiters
