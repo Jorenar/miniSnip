@@ -139,7 +139,6 @@ function! s:selectPlaceholder() abort
   else
     let s:ph_begin = searchpos(s:pattern_final, 'pw')[1]
     if s:ph_begin
-      let g:foo = 1
       call searchpos(s:pattern_final, 'cepwz')
     else
       unlet s:ph_begin
@@ -154,18 +153,21 @@ function! s:selectPlaceholder() abort
   " Delete placeholder
   exec 'normal! "_d'.s:ph_begin.'|"_x'
 
+  " Choose "append" if placeholder is the last element in a line
+  let l:m = col('.') == s:ph_begin - 1 ? 'a' : 'i'
+
   if empty(l:s) " the placeholder was empty, so just enter insert mode directly
     startinsert
-    if col('.') == s:ph_begin - 1
+    if l:m == 'a'
       call feedkeys("\<Right>", 'i')
     endif
   elseif l:skip
     " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
-    exec 'normal! i'.l:s
+    exec 'normal! ' . l:m . l:s
     call s:replaceRefs()
     call s:selectPlaceholder()
   else " paste the placeholder's default value in and enter select mode on it
-    exec 'normal! i' . l:s . "\<Esc>v" . s:ph_begin . "|o\<C-g>"
+    exec 'normal! '. l:m . l:s . "\<Esc>v" . s:ph_begin . "|o\<C-g>"
   endif
 endfunction
 
@@ -197,7 +199,7 @@ function! miniSnip#completeFunc(findstart, base) abort
     " Locate the start of the word
     let l:line = getline('.')
     let l:start = col('.') - 1
-    while l:start > 0 && l:line[l:start - 1] =~ '\S'
+    while l:start > 0 && l:line[l:start - 1] =~ '\f'
       let l:start -= 1
     endwhile
 

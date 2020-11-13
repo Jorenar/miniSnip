@@ -31,7 +31,7 @@ Features:
   * references to previous tags (e.g. `<{~2}>` refers to second placeholder)
   * evaluation of Vim functions (e.g. `<{!expand('%')}>`)
   * |ins-completion| function
-  * `<{@}>` can be used as `$0` in UltiSnips
+  * `<{+}>` will be targeted last (equivalent of `$0` in UltiSnips)
   * filetype-aware snippets
   * changing delimiters, snippet file filetype etc. (|miniSnip-configuration|)
 
