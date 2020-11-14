@@ -1,4 +1,4 @@
-" Global variables:
+" Script's global variables:
 "   s:pattern
 "   s:pattern_final
 "   s:op
@@ -19,7 +19,7 @@ function! miniSnip#trigger() abort
   let l:file = "''"
   if len(l:files) > 0
     let l:file = "'".l:files[0]."'"
-  elseif !search(s:pattern)
+  elseif empty(s:pattern)
     return eval('"' . escape(g:miniSnip_trigger, '\"<') . '"')
   endif
 
@@ -137,6 +137,7 @@ function! s:selectPlaceholder() abort
     let l:ph_body_end = searchpos(s:pattern, 'cepwz')[1] - 1 - len(s:ed)
     let l:s = getline('.')[s:ph_begin-1+len(s:op) : l:ph_body_end]
   else
+    let s:pattern = '' " empty makes nice flag variable
     let s:ph_begin = searchpos(s:pattern_final, 'pw')[1]
     if s:ph_begin
       call searchpos(s:pattern_final, 'cepwz')
