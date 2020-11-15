@@ -12,7 +12,7 @@ let s:pattern  = ""
 function! miniSnip#trigger() abort
   let l:cword = matchstr(getline('.'), '\v\f+%' . col('.') . 'c')
 
-  let s:begcol = col('.') - len(l:cword)
+  let s:begcol = virtcol('.') - strchars(l:cword)
 
   let l:files = globpath(join(s:directories(), ','), l:cword.'.'.g:miniSnip_ext, 0, 1)
 
@@ -91,13 +91,13 @@ function! s:insertFile(snipfile) abort
   endif
 
   " Go to the end of the last line of the snippet
-  let l:last_line_len = len(l:lns[-1]) + s:begcol - 1
+  let l:last_line_len = strchars(l:lns[-1]) + s:begcol - 1
   execute 'normal! '.l:last_line_len.'|'
 
 endfunction
 
 function! s:replaceRefs() abort
-  let l:s = getline('.')[s:ph_begin-1 : col('.')-1]
+  let l:s = getline('.')[s:ph_begin-1 : virtcol('.')-1]
   let s:placeholders_count += 1
   let l:pos = getpos('.')
   silent! execute '%s/\V'.s:op.g:miniSnip_refmark.s:placeholders_count.s:ed.'/'.l:s.'/g'
@@ -128,19 +128,32 @@ function! s:evaluate(str) abort
   return a:str
 endfunction
 
+function! s:findPlaceholder(pat) " from: https://stackoverflow.com/a/8697727/10247460
+    let [sl, sc] = searchpos(a:pat, 'w')
+    let s:ph_begin = virtcol('.')
+    let [el, ec] = searchpos(a:pat, 'cnew')
+    let t = map(getline(sl ? sl : -1, el), 'v:val."\n"')
+    if len(t) > 0
+        let t[0] = t[0][sc-1:]
+        let ec -= len(t) == 1 ? sc-1 : 0
+        let t[-1] = t[-1][:matchend(t[-1], '.', ec-1)-1]
+    end
+    return join(t, '')
+endfunction
+
 function! s:selectPlaceholder() abort
-  let s:ph_begin = searchpos(s:pattern, 'pw')[1]
 
-  let l:s = ""
+  let l:s = s:findPlaceholder(s:pattern)
 
-  if s:ph_begin
-    let l:ph_body_end = searchpos(s:pattern, 'cepwz')[1] - 1 - len(s:ed)
-    let l:s = getline('.')[s:ph_begin-1+len(s:op) : l:ph_body_end]
+  if !empty(l:s)
+    let l:len = strchars(l:s)
+    let l:s = l:s[strchars(s:op) : l:len-strchars(s:ed)-1]
   else
-    let s:pattern = '' " empty makes nice flag variable
-    let s:ph_begin = searchpos(s:pattern_final, 'pw')[1]
-    if s:ph_begin
-      call searchpos(s:pattern_final, 'cepwz')
+    let l:s = s:findPlaceholder(s:pattern_final)
+    if !empty(l:s)
+      let l:len = strchars(l:s)
+      let s:pattern = '' " empty makes nice flag variable
+      let l:s = ""
     else
       unlet s:ph_begin
       call feedkeys('a', 'n')
@@ -152,16 +165,13 @@ function! s:selectPlaceholder() abort
   let l:s = s:evaluate(l:s)
 
   " Delete placeholder
-  exec 'normal! "_d'.s:ph_begin.'|"_x'
+  exec 'normal! "_d'.l:len.'l'
 
   " Choose "append" if placeholder is the last element in a line
-  let l:m = col('.') == s:ph_begin - 1 ? 'a' : 'i'
+  let l:m = virtcol('.') == s:ph_begin - 1 ? 'a' : 'i'
 
   if empty(l:s) " the placeholder was empty, so just enter insert mode directly
-    startinsert
-    if l:m == 'a'
-      call feedkeys("\<Right>", 'i')
-    endif
+    call feedkeys(l:m, 'n')
   elseif l:skip
     " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
     exec 'normal! ' . l:m . l:s
@@ -199,7 +209,7 @@ function! miniSnip#completeFunc(findstart, base) abort
   if a:findstart
     " Locate the start of the word
     let l:line = getline('.')
-    let l:start = col('.') - 1
+    let l:start = virtcol('.') - 1
     while l:start > 0 && l:line[l:start - 1] =~ '\f'
       let l:start -= 1
     endwhile
@@ -220,11 +230,11 @@ endfunction
 function! miniSnip#completeMapping() abort
   " Locate the start of the word
   let l:line = getline('.')
-  let l:start = col('.') - 1
+  let l:start = virtcol('.') - 1
   while l:start > 0 && l:line[l:start - 1] =~? '\a'
     let l:start -= 1
   endwhile
-  let l:base = l:line[l:start : col('.')-1]
+  let l:base = l:line[l:start : virtcol('.')-1]
   if l:base is# ' '
     let l:base = ''
   endif
