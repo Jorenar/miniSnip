@@ -58,6 +58,7 @@ See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and option
   * `<{+}>` will be targeted last (equivalent of `$0` in UltiSnips)
   * filetype-aware snippets
   * changing delimiters, snippet file filetype etc. (`:h miniSnip-configuration`)
+  * local snippets (`:h g:miniSnip_local`)
 
 ## Examples
 
@@ -123,3 +124,4 @@ Main differences:
   * directories instead of prefixes for snippets file management
   * respect `expandtab`
   * one final placeholder (`:h g:miniSnip_finalTag`) instead of final delimiters
+  * local snippets

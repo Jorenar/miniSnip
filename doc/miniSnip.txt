@@ -34,6 +34,7 @@ Features:
   * `<{+}>` will be targeted last (equivalent of `$0` in UltiSnips)
   * filetype-aware snippets
   * changing delimiters, snippet file filetype etc. (|miniSnip-configuration|)
+  * local snippets (|g:miniSnip_local|)
 
 ===============================================================================
 EXAMPLES                                                    *miniSnip-examples*
@@ -103,6 +104,12 @@ A list of directories to look for snippet files.
 
 For example to share system-wide snippets: >
     let g:miniSnip_dirs = [ '/usr/share/miniSnip', '~/.vim/miniSnip' ]
+
+-------------------------------------------------------------------------------
+                                                           *'g:miniSnip_local'*
+Default: 1
+
+Whether to read snippets from `.miniSnip` directory under current location.
 
 -------------------------------------------------------------------------------
                                                              *'g:miniSnip_ext'*
@@ -255,5 +262,6 @@ Main differences:
   * directories instead of prefixes for snippets file management
   * respect |expandtab|
   * one final placeholder ( |g:miniSnip_finalTag| ) instead of final delimiters
+  * local snippets
 
  vim:tw=78:ts=4:ft=help:norl:nofen:

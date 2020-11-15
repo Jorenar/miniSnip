@@ -196,7 +196,9 @@ function! s:directories() abort
 
   let l:dirs = []
 
-  for l:dir in g:miniSnip_dirs
+  let l:local = g:miniSnip_local ? [ "./.miniSnip" ] : []
+
+  for l:dir in l:local + g:miniSnip_dirs
     let l:dirs += map(deepcopy(l:filetypes), {_, val -> l:dir.'/'.val})
   endfor
 
