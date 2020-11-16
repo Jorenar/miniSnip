@@ -5,9 +5,10 @@ License:    MIT
 
 1. Overview                    |miniSnip-overview|
 2. Examples                    |miniSnip-examples|
-3. Mappings                    |miniSnip-mappings|
-4. Configuration               |miniSnip-configuration|
-5. Miscellaneous               |miniSnip-miscellaneous|
+3. Commands                    |miniSnip-commands|
+4. Mappings                    |miniSnip-mappings|
+6. Configuration               |miniSnip-configuration|
+8. Miscellaneous               |miniSnip-miscellaneous|
 
 ===============================================================================
 OVERVIEW                                                    *miniSnip-overview*
@@ -79,6 +80,17 @@ EXAMPLES                                                    *miniSnip-examples*
 <
 
 ===============================================================================
+COMMANDS                                                    *miniSnip-commands*
+
+:MiniSnip [snippet]                                                 *:MiniSnip*
+            Create new or edit existing snippet.
+            Variable |g:miniSnip_vert| controls if new window will be opened
+            vertically or horizontaly.
+
+:MiniSnipDelete [snippet]                                     *:MiniSnipDelete*
+            Delete snippet file.
+
+===============================================================================
 MAPPINGS                                                    *miniSnip-mappings*
 
 -------------------------------------------------------------------------------
@@ -130,6 +142,13 @@ Example: >
 Filetype `C++` after loading its own snippets will look first through Objective-C
 snippets and then through C snippets (and at the end `all`). Every snippet with
 unique name will be imported.
+
+-------------------------------------------------------------------------------
+                                                            *'g:miniSnip_vert'*
+Default: 1
+
+Specifies if window opened by command |:MiniSnip| should be opened vertically
+or not. Set to `0` if you prefer horizontally.
 
 -------------------------------------------------------------------------------
                                                          *'g:miniSnip_trigger'*
@@ -263,5 +282,6 @@ Main differences:
   * respect |expandtab|
   * one final placeholder ( |g:miniSnip_finalTag| ) instead of final delimiters
   * local snippets
+  * snippet management commands
 
  vim:tw=78:ts=4:ft=help:norl:nofen:

@@ -245,6 +245,15 @@ function! miniSnip#completeMapping() abort
   return ''
 endfunction
 
+function! miniSnip#completeCommand(ArgLead, ...) abort
+  let l:dirs = join(s:directories(), ',')
+  let l:all = globpath(l:dirs, a:ArgLead.'*.'.g:miniSnip_ext, 0, 1)
+  call filter(l:all, {_, path -> filereadable(path)})
+  call map(l:all, 'fnamemodify(v:val, ":t:r")')
+  call sort(l:all, 'i')
+  return l:all
+endfunction
+
 function! s:buildComp(_, path) abort
   let l:name = fnamemodify(a:path, ':t:r')
   let l:content = readfile(a:path)
@@ -260,6 +269,27 @@ function! s:buildComp(_, path) abort
         \ 'info':  join(l:content, "\n"),
         \ 'kind':  's',
         \ }
+endfunction
+
+" --- Management
+
+function! miniSnip#edit(name) abort
+  let l:files = globpath(join(s:directories(), ','), a:name.'.'.g:miniSnip_ext, 0, 1)
+  if len(l:files) > 0
+    let l:file = l:files[0]
+  else
+    let l:ft = empty(&ft) ? "all" : &ft
+    call mkdir(g:miniSnip_dirs[0]."/".l:ft, 'p')
+    let l:file = g:miniSnip_dirs[0]."/".l:ft."/".a:name.".".g:miniSnip_ext
+  endif
+  exec "vnew ".l:file
+endfunction
+
+function! miniSnip#delete(name) abort
+  let l:files = globpath(join(s:directories(), ','), a:name.'.'.g:miniSnip_ext, 0, 1)
+  if len(l:files) > 0
+    call delete(l:files[0])
+  endif
 endfunction
 
 " vim: fen sw=2

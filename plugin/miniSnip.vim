@@ -47,5 +47,8 @@ augroup miniSnip
   au FileType snip exec "syntax match Keyword /" . g:miniSnip_closing . "/"
 augroup END
 
+command -nargs=1 -complete=customlist,miniSnip#completeCommand MiniSnip call miniSnip#edit("<args>")
+command -nargs=1 -complete=customlist,miniSnip#completeCommand MiniSnipDelete call miniSnip#delete("<args>")
+
 let g:loaded_miniSnip = 1
 let &cpo = s:cpo_save | unlet s:cpo_save

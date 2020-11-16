@@ -59,6 +59,7 @@ See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and option
   * filetype-aware snippets
   * changing delimiters, snippet file filetype etc. (`:h miniSnip-configuration`)
   * local snippets (`:h g:miniSnip_local`)
+  * snippet management commands
 
 ## Examples
 
