@@ -47,6 +47,9 @@ Filetype-aware snippets are also available. For example, a file called
 `main` in `~/.vim/miniSnip/java/main.snip` will create a `main` snippet only when
 `filetype=java`, allowing you to add a `main` for C, `main` for C++ and so on.
 
+Alternatively, you also use `:MiniSnip` command to create a new snippet for
+currently opened filetype.
+
 See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and options.
 
 ## Features
