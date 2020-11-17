@@ -32,10 +32,13 @@ function! s:updatePattern(str) abort
   " Check for delimeters changes
   if a:str =~ '^\V'.g:miniSnip_delimChg
     let l:custom = 1
-    let l:delims = matchlist(a:str, "\v`(.{-})` `(.{-})`")
+    let l:delims = matchlist(a:str, '\V`\(\.\{-}\)` `\(\.\{-}\)`')
     if !empty(l:delims)
       let s:op = l:delims[1]
       let s:ed = l:delims[2]
+    else " no delims found, so use default
+      let s:op = g:miniSnip_opening
+      let s:ed = g:miniSnip_closing
     endif
   else " reset delims
     let s:op = g:miniSnip_opening
