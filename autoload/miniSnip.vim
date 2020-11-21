@@ -211,12 +211,7 @@ function! s:directories() abort
   let l:dirs = isdirectory("./.miniSnip") ? [ g:miniSnip_local ] : []
 
   if empty(g:miniSnip_dirs)
-    for l:dir in split(&runtimepath, ",")
-      let l:d = l:dir . "/miniSnip"
-      if isdirectory(l:d)
-        call add(l:dirs, l:d)
-      endif
-    endfor
+    let l:dirs += map(split(&runtimepath, ","), {_, val -> val."/miniSnip" })
   else
     let l:dirs += g:miniSnip_dirs
   endif

@@ -9,7 +9,7 @@ let g:miniSnip_trigger  = get(g:, 'miniSnip_trigger', '<Tab>')
 let g:miniSnip_complkey = get(g:, 'miniSnip_complkey', '<C-x><C-u>')
 let g:miniSnip_extends  = get(g:, 'miniSnip_extends', {})
 let g:miniSnip_ext      = get(g:, 'miniSnip_ext', 'snip')
-let g:miniSnip_local    = get(g:, 'miniSnip_local', 1)
+let g:miniSnip_local    = get(g:, 'miniSnip_local', ".miniSnip")
 
 let g:miniSnip_delimChg = get(g:, 'miniSnip_delimChg', '$' )
 let g:miniSnip_descmark = get(g:, 'miniSnip_descmark', '?' )

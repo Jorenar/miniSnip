@@ -118,9 +118,10 @@ For example to share system-wide snippets: >
 
 -------------------------------------------------------------------------------
                                                            *'g:miniSnip_local'*
-Default: 1
+Default: ".miniSnip"
 
-Whether to read snippets from `.miniSnip` directory under current location.
+If not empty, will read snippets from directory with that name under current
+location.
 
 -------------------------------------------------------------------------------
                                                              *'g:miniSnip_ext'*
