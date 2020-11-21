@@ -208,7 +208,7 @@ function! s:directories() abort
 
   let l:filetypes += [ "all" ]
 
-  let l:dirs = isdirectory("./.miniSnip") ? [ g:miniSnip_local ] : []
+  let l:dirs = !empty(g:miniSnip_local) ? [ "./" . g:miniSnip_local ] : []
 
   if empty(g:miniSnip_dirs)
     let l:dirs += map(split(&runtimepath, ","), {_, val -> val."/miniSnip" })
