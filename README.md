@@ -63,6 +63,7 @@ See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and option
   * changing delimiters, snippet file filetype etc. (`:h miniSnip-configuration`)
   * local snippets (`:h g:miniSnip_local`)
   * snippet management commands
+  * named placeholders (`:h g:miniSnip_named`)
 
 ## Examples
 
@@ -129,3 +130,4 @@ Main differences:
   * respect `expandtab`
   * one final placeholder (`:h g:miniSnip_finalTag`) instead of final delimiters
   * local snippets
+  * named placeholders

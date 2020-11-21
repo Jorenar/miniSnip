@@ -6,6 +6,7 @@
 "   s:begcol
 "   s:ph_begin
 "   s:placeholders_count
+"   s:named
 
 let s:pattern  = ""
 
@@ -104,6 +105,11 @@ function! s:replaceRefs() abort
   let s:placeholders_count += 1
   let l:pos = getpos('.')
   silent! execute '%s/\V'.s:op.g:miniSnip_refmark.s:placeholders_count.s:ed.'/'.l:s.'/g'
+  if exists("s:named")
+    " `s:named` already contains g:miniSnip_named
+    silent! execute '%s/\V'.s:op.s:named.s:ed.'/'.l:s.'/g'
+    unlet s:named
+  endif
   call setpos('.', l:pos)
   unlet s:ph_begin
 endfunction
@@ -162,6 +168,11 @@ function! s:selectPlaceholder() abort
       call feedkeys('a', 'n')
       return
     endif
+  endif
+
+  if l:s =~ '\V\^' . g:miniSnip_named
+    let s:named = l:s
+    let l:s = l:s[1:]
   endif
 
   let l:skip = l:s =~ '\V\^' . g:miniSnip_evalmark

@@ -230,11 +230,35 @@ This will automatically fill the `#define` line with the value entered on the
 `#ifndef` line upon jumping to it and skip to the body between include guards.
 
 -------------------------------------------------------------------------------
+                                                           *'g:miniSnip_named'*
+Default: '@'
+
+It's similiar to |g:miniSnip_refmark|, but instead of numbers operates on default
+values, i.e. it replaces all placeholders with the same default value (this
+marker included) with the user input.
+Example: >
+    #ifndef <{@foo}>_HPP_
+    #define <{~1}>_HPP_
+
+    namespace <{}> {
+
+    } // <{~2}>
+
+    #endif // <{@foo}>
+<
+Comment after `#endif` will have the same text as the value entered on the
+`#ifndef` line. If user decides to leave default value, then `@` will be trimmed
+and only `foo` will be left.
+
+WARNING! Refmarks still apply! So in the above example, placeholder on `#define`
+line will also have the value from `#ifndef` line.
+
+-------------------------------------------------------------------------------
                                                         *'g:miniSnip_finalTag'*
 Default: '+'
 
-The the final placeholder string to use. While the normal placeholders will
-be dealt with in the order they appear in the snippet, this placeholder will
+The final placeholder string to use. While the normal placeholders will be
+dealt with in the order they appear in the snippet, this placeholder will
 be targeted last. >
     # BEGIN FUNCTION <{}> <{+}>
     <{}>
@@ -283,5 +307,6 @@ Main differences:
   * one final placeholder ( |g:miniSnip_finalTag| ) instead of final delimiters
   * local snippets
   * snippet management commands
+  * named placeholders
 
  vim:tw=78:ts=4:ft=help:norl:nofen:
