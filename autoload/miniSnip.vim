@@ -47,7 +47,7 @@ function! s:updatePattern(str) abort
   endif
 
   " Apply delims
-  let s:pattern = '\V' . s:op . '\(\[^' . g:miniSnip_finalTag . ']\.\{-}\)\?' . s:ed
+  let s:pattern = '\V' . s:op . '\(\(' . s:ed . '\)\|\(\[^' . g:miniSnip_finalTag . ']\.\{-}' .s:ed . '\)\)'
   let s:pattern_final = '\V' . s:op . g:miniSnip_finalTag . s:ed
 
   return l:custom
