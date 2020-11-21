@@ -208,15 +208,31 @@ function! s:directories() abort
 
   let l:filetypes += [ "all" ]
 
-  let l:dirs = []
+  let l:dirs = isdirectory("./.miniSnip") ? [ g:miniSnip_local ] : []
 
-  let l:local = g:miniSnip_local ? [ "./.miniSnip" ] : []
+  if empty(g:miniSnip_dirs)
+    for l:dir in split(&runtimepath, ",")
+      let l:d = l:dir . "/miniSnip"
+      if isdirectory(l:d)
+        call add(l:dirs, l:d)
+      endif
+    endfor
+  else
+    let l:dirs += g:miniSnip_dirs
+  endif
 
-  for l:dir in l:local + g:miniSnip_dirs
-    let l:dirs += map(deepcopy(l:filetypes), {_, val -> l:dir.'/'.val})
+  let l:ft_dirs = []
+
+  for l:dir in l:dirs
+    for l:ft in l:filetypes
+      let l:d = l:dir . "/" . l:ft
+      if isdirectory(l:d)
+        call add(l:ft_dirs, l:d)
+      endif
+    endfor
   endfor
 
-  return l:dirs
+  return l:ft_dirs
 endfunction
 
 " --- Completion

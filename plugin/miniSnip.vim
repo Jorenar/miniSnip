@@ -4,7 +4,7 @@
 if exists('g:loaded_miniSnip') | finish | endif
 let s:cpo_save = &cpo | set cpo&vim
 
-let g:miniSnip_dirs     = get(g:, 'miniSnip_dirs', [ substitute(&rtp, ",.*", "", "")."/miniSnip" ])
+let g:miniSnip_dirs     = get(g:, 'miniSnip_dirs', [])
 let g:miniSnip_trigger  = get(g:, 'miniSnip_trigger', '<Tab>')
 let g:miniSnip_complkey = get(g:, 'miniSnip_complkey', '<C-x><C-u>')
 let g:miniSnip_extends  = get(g:, 'miniSnip_extends', {})
