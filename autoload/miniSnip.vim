@@ -245,7 +245,7 @@ endfunction
 
 function! miniSnip#completeMapping() abort
   " Locate the start of the word
-  let l:line = matchstr(getline('.'), '\a\+\%' . col('.') . 'c')
+  let l:line = matchstr(getline('.'), '\v\f+%' . col('.') . 'c')
   if l:line is# ' '
     let l:line = ''
   endif
