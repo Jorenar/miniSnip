@@ -245,17 +245,13 @@ endfunction
 
 function! miniSnip#completeMapping() abort
   " Locate the start of the word
-  let l:line = getline('.')
-  let l:start = virtcol('.') - 1
-  while l:start > 0 && l:line[l:start - 1] =~? '\a'
-    let l:start -= 1
-  endwhile
-  let l:base = l:line[l:start : virtcol('.')-1]
-  if l:base is# ' '
-    let l:base = ''
+  let l:line = matchstr(getline('.'), '\a\+\%' . col('.') . 'c')
+  if l:line is# ' '
+    let l:line = ''
   endif
+  let l:start = virtcol('.') - len(l:line)
 
-  call complete(l:start + 1, miniSnip#completeFunc(0, l:base))
+  call complete(l:start, miniSnip#completeFunc(0, l:line))
   return ''
 endfunction
 
