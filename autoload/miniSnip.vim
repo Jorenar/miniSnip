@@ -30,6 +30,9 @@ endfunction
 function! s:updatePattern(str) abort
   let l:custom = 0
 
+  let s:op = g:miniSnip_opening
+  let s:ed = g:miniSnip_closing
+
   " Check for delimeters changes
   if a:str =~ '^\V'.g:miniSnip_delimChg
     let l:custom = 1
@@ -37,13 +40,7 @@ function! s:updatePattern(str) abort
     if !empty(l:delims)
       let s:op = l:delims[1]
       let s:ed = l:delims[2]
-    else " no delims found, so use default
-      let s:op = g:miniSnip_opening
-      let s:ed = g:miniSnip_closing
     endif
-  else " reset delims
-    let s:op = g:miniSnip_opening
-    let s:ed = g:miniSnip_closing
   endif
 
   " Apply delims
@@ -54,9 +51,6 @@ function! s:updatePattern(str) abort
 endfunction
 
 function! s:insertFile(snipfile) abort
-  " Adjust the indentation, use the current line as reference
-  let l:ws = matchstr(getline(line('.')), '^\s\+')
-
   let l:content = readfile(a:snipfile)
 
   " Remove description
@@ -69,34 +63,18 @@ function! s:insertFile(snipfile) abort
     call remove(l:content, 0)
   endif
 
-  let l:lns = l:content[:0] + map(l:content[1:], 'empty(v:val) ? v:val : l:ws.v:val') " indent
+  " For adjusting the indentation (use the current line as reference)
+  let l:ws = matchstr(getline(line('.')), '^\s\+')
 
   " Delete snippet name
   exec 'normal! "_d'.s:begcol.'|"_x'
 
-  if virtcol('.') >= s:begcol " there is something following the snippet
-    let l:endOfLine = strpart(getline('.'), col('.')-1)
-    normal! "_D
-  endif
-
   " Insert snippet
-  for l in l:lns
-    execute "normal! a" . l . "\<CR>"
-  endfor " and then remove last new (blank) line
-  normal! "_dd
-
-  if line('.') != line('$') " get back to last line of snippet
-    normal! k
-  endif
-
-  if exists("l:endOfLine") " add the end of the line after the snippet
-    call append((line('.')), l:endOfLine)
-    join!
-  endif
-
-  " Go to the end of the last line of the snippet
-  let l:last_line_len = strchars(l:lns[-1]) + s:begcol - 1
-  execute 'normal! '.l:last_line_len.'|'
+  execute "normal! " . (virtcol('.') < s:begcol ? "a" : "i") . l:content[0] . "\<CR>"
+  for l in l:content[1:]
+    execute "normal! i" . l:ws . l . "\<CR>"
+  endfor
+  normal! kJ
 
 endfunction
 
@@ -138,16 +116,16 @@ function! s:evaluate(str) abort
 endfunction
 
 function! s:findPlaceholder(pat) " from: https://stackoverflow.com/a/8697727/10247460
-    let [sl, sc] = searchpos(a:pat, 'w')
-    let s:ph_begin = virtcol('.')
-    let [el, ec] = searchpos(a:pat, 'cnew')
-    let t = map(getline(sl ? sl : -1, el), 'v:val."\n"')
-    if len(t) > 0
-        let t[0] = t[0][sc-1:]
-        let ec -= len(t) == 1 ? sc-1 : 0
-        let t[-1] = t[-1][:matchend(t[-1], '.', ec-1)-1]
-    end
-    return join(t, '')
+  let [sl, sc] = searchpos(a:pat, 'w')
+  let s:ph_begin = virtcol('.')
+  let [el, ec] = searchpos(a:pat, 'cnew')
+  let t = map(getline(sl ? sl : -1, el), 'v:val."\n"')
+  if len(t) > 0
+    let t[0] = t[0][sc-1:]
+    let ec -= len(t) == 1 ? sc-1 : 0
+    let t[-1] = t[-1][:matchend(t[-1], '.', ec-1)-1]
+  end
+  return join(t, '')
 endfunction
 
 function! s:selectPlaceholder() abort
