@@ -70,11 +70,13 @@ function! s:insertFile(snipfile) abort
   exec 'normal! "_d'.s:begcol.'|"_x'
 
   " Insert snippet
+  let [ l:fo_old, &l:fo ] = [ &l:formatoptions, "" ]
   execute "normal! " . (virtcol('.') < s:begcol ? "a" : "i") . l:content[0] . "\<CR>"
   for l in l:content[1:]
     execute "normal! i" . l:ws . l . "\<CR>"
   endfor
   normal! kJ
+  let &l:formatoptions = l:fo_old
 
 endfunction
 
