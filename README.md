@@ -64,6 +64,7 @@ See [the documentation](doc/miniSnip.txt) to learn the snippet syntax and option
   * local snippets (`:h g:miniSnip_local`)
   * snippet management commands
   * named placeholders (`:h g:miniSnip_named`)
+  * global and local to buffer configuration (`:h g:miniSnip-configuration`)
 
 ## Examples
 

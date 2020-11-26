@@ -35,7 +35,10 @@ Features:
   * `<{+}>` will be targeted last (equivalent of `$0` in UltiSnips)
   * filetype-aware snippets
   * changing delimiters, snippet file filetype etc. (|miniSnip-configuration|)
+  * snippet management commands
   * local snippets (|g:miniSnip_local|)
+  * named placeholders (|g:miniSnip_named|)
+  * global and local to buffer configuration (|miniSnip-configuration|)
 
 ===============================================================================
 EXAMPLES                                                    *miniSnip-examples*
@@ -106,6 +109,10 @@ MAPPINGS                                                    *miniSnip-mappings*
 
 ===============================================================================
 CONFIGURATION                                          *miniSnip-configuration*
+
+All presented global variables have their |buffer-variable| version, so you can
+e.g. change delimeters for filetype without the need of putting 'chane delim'
+string in every snippet file.
 
 -------------------------------------------------------------------------------
                                                             *'g:miniSnip_dirs'*
