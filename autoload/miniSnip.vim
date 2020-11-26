@@ -1,12 +1,6 @@
-" Script's global variables:
-"   s:pattern
-"   s:pattern_final
-"   s:op
-"   s:ed
-"   s:begcol
-"   s:ph_begin
-"   s:placeholders_count
-"   s:named
+" Script scope variables:
+"   s:pattern, s:pattern_final, s:op, s:ed, s:begcol,
+"   s:ph_begin, s:placeholders_count, s:named
 
 let s:pattern  = ""
 
@@ -51,16 +45,16 @@ function! s:updatePattern(str) abort
 endfunction
 
 function! s:insertFile(snipfile) abort
-  let l:content = readfile(a:snipfile)
+  let l:snip = readfile(a:snipfile)
 
   " Remove description
-  if l:content[0] =~ '^'.g:miniSnip_descmark
-    call remove(l:content, 0)
+  if l:snip[0] =~ '^'.g:miniSnip_descmark
+    call remove(l:snip, 0)
   endif
 
   " If custom delims were applied, remove line with them
-  if s:updatePattern(l:content[0])
-    call remove(l:content, 0)
+  if s:updatePattern(l:snip[0])
+    call remove(l:snip, 0)
   endif
 
   " For adjusting the indentation (use the current line as reference)
@@ -69,13 +63,19 @@ function! s:insertFile(snipfile) abort
   " Delete snippet name
   exec 'normal! "_d'.s:begcol.'|"_x'
 
+  if virtcol('.') >= s:begcol " there is something following the snippet
+    let l:suf = strpart(getline('.'), col('.')-1)
+    normal! "_D
+  endif
+
   " Insert snippet
   let [ l:fo_old, &l:fo ] = [ &l:formatoptions, "" ]
-  execute "normal! " . (virtcol('.') < s:begcol ? "a" : "i") . l:content[0] . "\<CR>"
-  for l in l:content[1:]
+  execute "normal! " . (virtcol('.') < s:begcol ? "a" : "i") . l:snip[0] . "\<CR>"
+  for l in l:snip[1:]
     execute "normal! i" . l:ws . l . "\<CR>"
   endfor
-  normal! kJ
+  norm! kgJ
+  if exists("l:suf") | call append((line('.')), l:suf) | join! | endif
   let &l:formatoptions = l:fo_old
 
 endfunction
@@ -257,17 +257,17 @@ endfunction
 
 function! s:buildComp(_, path) abort
   let l:name = fnamemodify(a:path, ':t:r')
-  let l:content = readfile(a:path)
+  let l:snip = readfile(a:path)
   let l:description = ""
 
-  if l:content[0] =~ '^'.g:miniSnip_descmark
-    let l:description = substitute(l:content[0], '^'.g:miniSnip_descmark.'\s\?', '', '')
+  if l:snip[0] =~ '^'.g:miniSnip_descmark
+    let l:description = substitute(l:snip[0], '^'.g:miniSnip_descmark.'\s\?', '', '')
   endif
 
   return {
         \ 'word':  l:name,
         \ 'menu':  l:description,
-        \ 'info':  join(l:content, "\n"),
+        \ 'info':  join(l:snip, "\n"),
         \ 'kind':  's',
         \ }
 endfunction
