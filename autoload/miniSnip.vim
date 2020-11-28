@@ -79,7 +79,10 @@ function! s:insertFile(snipfile) abort
     execute "normal! i" . l:ws . l . "\<CR>"
   endfor
   norm! kgJ
-  if exists("l:suf") | call append((line('.')), l:suf) | join! | endif
+  if exists("l:suf")
+    call append((line('.')), l:suf)
+    norm! gJ
+  endif
   let &l:formatoptions = l:fo_old
 
 endfunction
