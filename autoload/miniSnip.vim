@@ -142,10 +142,10 @@ function! s:selectPlaceholder() abort
     let l:len = strchars(l:s)
     let l:s = l:s[strchars(s:op) : l:len-strchars(s:ed)-1]
   else
+    let s:pattern = '' " empty makes nice flag variable
     let l:s = s:findPlaceholder(s:pattern_final)
     if !empty(l:s)
       let l:len = strchars(l:s)
-      let s:pattern = '' " empty makes nice flag variable
       let l:s = ""
     else
       unlet s:ph_begin
