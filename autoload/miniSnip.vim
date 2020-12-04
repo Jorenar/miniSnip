@@ -65,23 +65,22 @@ function! s:insertFile(snipfile) abort
   let l:ws = matchstr(getline(line('.')), '^\s\+')
 
   " Delete snippet name
-  exec 'normal! "_d'.s:begcol.'|"_x'
+  exec 'norm! "_d'.s:begcol.'|"_x'
 
   if virtcol('.') >= s:begcol " there is something following the snippet
     let l:suf = strpart(getline('.'), col('.')-1)
-    normal! "_D
+    norm! "_D
   endif
 
   " Insert snippet
   let [ l:fo_old, &l:fo ] = [ &l:formatoptions, "" ]
-  execute "normal! " . (virtcol('.') < s:begcol ? "a" : "i") . l:snip[0] . "\<CR>"
+  exec "norm! " . (virtcol('.') < s:begcol ? "a" : "i") . l:snip[0] . "\<CR>"
   for l in l:snip[1:]
-    execute "normal! i" . l:ws . l . "\<CR>"
+    exec "norm! i" . l:ws . l . "\<CR>"
   endfor
   norm! kgJ
   if exists("l:suf")
-    call append((line('.')), l:suf)
-    norm! gJ
+    call append((line('.')), l:suf) | norm! gJ
   endif
   let &l:formatoptions = l:fo_old
 
@@ -91,10 +90,11 @@ function! s:replaceRefs() abort
   let l:s = getline('.')[s:ph_begin-1 : virtcol('.')-1]
   let s:placeholders_count += 1
   let l:pos = getpos('.')
-  silent! execute '%s/\V'.s:op.s:var("refmark").s:placeholders_count.s:ed.'/'.l:s.'/g'
+  undojoin
+  silent! exec '%s/\V'.s:op.s:var("refmark").s:placeholders_count.s:ed.'/'.l:s.'/g'
   if exists("s:named")
     " `s:named` already contains s:var("named")
-    silent! execute '%s/\V'.s:op.s:named.s:ed.'/'.l:s.'/g'
+    silent! exec '%s/\V'.s:op.s:named.s:ed.'/'.l:s.'/g'
     unlet s:named
   endif
   call setpos('.', l:pos)
@@ -124,7 +124,7 @@ function! s:evaluate(str) abort
   return a:str
 endfunction
 
-function! s:findPlaceholder(pat) " from: https://stackoverflow.com/a/8697727/10247460
+function! s:findPlaceholder(pat) abort " from: https://stackoverflow.com/a/8697727/10247460
   let [sl, sc] = searchpos(a:pat, 'w')
   let s:ph_begin = virtcol('.')
   let [el, ec] = searchpos(a:pat, 'cnew')
@@ -166,7 +166,7 @@ function! s:selectPlaceholder() abort
   let l:s = s:evaluate(l:s)
 
   " Delete placeholder
-  exec 'normal! "_d'.l:len.'l'
+  exec 'norm! "_d'.l:len.'l'
 
   " Choose "append" if placeholder is the last element in a line
   let l:m = virtcol('.') == s:ph_begin - 1 ? 'a' : 'i'
@@ -175,11 +175,11 @@ function! s:selectPlaceholder() abort
     call feedkeys(l:m, 'n')
   elseif l:skip
     " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
-    exec 'normal! ' . l:m . l:s
+    exec 'norm! ' . l:m . l:s
     call s:replaceRefs()
     call s:selectPlaceholder()
   else " paste the placeholder's default value in and enter select mode on it
-    exec 'normal! '. l:m . l:s . "\<Esc>v" . s:ph_begin . "|o\<C-g>"
+    exec 'norm! '. l:m . l:s . "\<Esc>v" . s:ph_begin . "|o\<C-g>"
   endif
 endfunction
 
@@ -299,5 +299,3 @@ function! miniSnip#delete(name) abort
     call delete(l:files[0])
   endif
 endfunction
-
-" vim: fen sw=2
