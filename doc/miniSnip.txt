@@ -285,7 +285,7 @@ Example: >
 `Shebang` is a description of snippet and `#!/usr/bin/env sh` its actual body.
 
 -------------------------------------------------------------------------------
-                                                        *'g:miniSnip_deli Chg'*
+                                                        *'g:miniSnip_delimChg'*
 Default: '$'
 
 If first (second if description was provided) line starts with `$`, then change
