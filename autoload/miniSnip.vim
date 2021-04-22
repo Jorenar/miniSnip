@@ -286,9 +286,10 @@ function! miniSnip#edit(name) abort
   if len(l:files) > 0
     let l:file = l:files[0]
   else
-    let l:ft = empty(&ft) ? "all" : &ft
-    call mkdir(s:var("dirs")[0]."/".l:ft, 'p')
-    let l:file = s:var("dirs")[0]."/".l:ft."/".a:name.".".s:var("ext")
+    let l:dir  = empty(s:var("dirs")) ? split(&rtp, ",")[0]."/miniSnip" : s:var("dirs")[0]
+    let l:dir .= "/" . (empty(&ft) ? "all" : &ft)
+    call mkdir(l:dir, 'p')
+    let l:file = l:dir."/".a:name.".".s:var("ext")
   endif
   exec "vnew ".l:file
 endfunction
