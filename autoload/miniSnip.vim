@@ -1,6 +1,6 @@
 " Script scope variables:
 "   s:pattern, s:pattern_final, s:op, s:ed, s:begcol,
-"   s:ph_begin, s:placeholders_count, s:named
+"   s:ph_begin, s:ph_begin_pos, s:placeholders_count, s:named
 
 let s:pattern  = ""
 
@@ -86,8 +86,18 @@ function! s:insertFile(snipfile) abort
 
 endfunction
 
+function! s:getInsertedText() abort
+    let [line_start, column_start] = s:ph_begin_pos
+    let [line_end, column_end] = getpos('.')[1:2]
+    let lines = getline(line_start, line_end)
+    if empty(lines) | return "" | endif
+    let lines[-1] = lines[-1][: column_end-1]
+    let lines[0] = lines[0][column_start - 1:]
+    return join(lines, "\n")
+endfunction
+
 function! s:replaceRefs() abort
-  let l:s = getline('.')[s:ph_begin-1 : virtcol('.')-1]
+  let l:s = s:getInsertedText()
   let s:placeholders_count += 1
   let l:pos = getpos('.')
   undojoin
@@ -98,7 +108,7 @@ function! s:replaceRefs() abort
     unlet s:named
   endif
   call setpos('.', l:pos)
-  unlet s:ph_begin
+  unlet s:ph_begin s:ph_begin_pos
 endfunction
 
 function! miniSnip#expand(snipfile) abort
@@ -124,9 +134,9 @@ function! s:evaluate(str) abort
   return a:str
 endfunction
 
-function! s:findPlaceholder(pat) abort " from: https://stackoverflow.com/a/8697727/10247460
+function! s:findPlaceholder(pat) abort " from: https://stackoverflow.com/a/8697727
   let [sl, sc] = searchpos(a:pat, 'w')
-  let s:ph_begin = virtcol('.')
+  let [ s:ph_begin, s:ph_begin_pos ] = [ virtcol('.'), getpos('.')[1:2] ]
   let [el, ec] = searchpos(a:pat, 'cnew')
   let t = map(getline(sl ? sl : -1, el), 'v:val."\n"')
   if len(t) > 0
@@ -288,9 +298,7 @@ function! miniSnip#edit(name) abort
   else
     let l:dir  = empty(s:var("dirs")) ? split(&rtp, ",")[0]."/miniSnip" : s:var("dirs")[0]
     let l:dir .= "/" . (empty(&ft) ? "all" : &ft)
-    if !isdirectory(l:dir)
-      call mkdir(l:dir, 'p')
-    endif
+    if !isdirectory(l:dir) | call mkdir(l:dir, 'p') | endif
     let l:file = l:dir."/".a:name.".".s:var("ext")
   endif
   exec "vnew ".l:file
