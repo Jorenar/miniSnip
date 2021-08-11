@@ -97,13 +97,12 @@ function! s:getInsertedText() abort
 endfunction
 
 function! s:replaceRefs() abort
-  let l:s = s:getInsertedText()
+  let l:s = escape(s:getInsertedText(), '/\\')
   let s:placeholders_count += 1
   let l:pos = getpos('.')
   undojoin
   silent! exec '%s/\V'.s:op.s:var("refmark").s:placeholders_count.s:ed.'/'.l:s.'/g'
-  if exists("s:named")
-    " `s:named` already contains s:var("named")
+  if exists('s:named') " `s:named` already contains s:var('named')
     silent! exec '%s/\V'.s:op.s:named.s:ed.'/'.l:s.'/g'
     unlet s:named
   endif
