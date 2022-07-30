@@ -11,6 +11,7 @@ function! miniSnip#trigger() abort
       return ""
     else
       let s:SNIP = s:Snip(file)
+      let ret .= "\<Esc>:call ".sid."parseFile()\<CR>"
       let ret .= "\<Esc>:call ".sid."insertSnippet()\<CR>"
     endif
   else
@@ -122,18 +123,24 @@ function! s:updatePattern(str) abort
   return s:SNIP.flags.customDelims
 endfunction
 
-function! s:insertSnippet() abort
-  let snippet = readfile(s:SNIP.file)
+function! s:parseFile() abort
+  let file = readfile(s:SNIP.file)
 
   " Remove description
-  if snippet[0] =~ '^'.(s:SNIP.marks.desc)
-    call remove(snippet, 0)
+  if file[0] =~ '^'.(s:SNIP.marks.desc)
+    call remove(file, 0)
   endif
 
   " If custom delims were applied, remove line with them
-  if s:updatePattern(snippet[0])
-    call remove(snippet, 0)
+  if s:updatePattern(file[0])
+    call remove(file, 0)
   endif
+
+  let s:SNIP.snippet = file
+endfunction
+
+function! s:insertSnippet() abort
+  let snippet = s:SNIP.snippet
 
   " Adjust indentation (using current line as reference)
   let ws = matchstr(getline('.'), '^\s\+')
