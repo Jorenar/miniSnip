@@ -62,7 +62,13 @@ function! s:directories() abort
 endfunction
 
 function! s:findSnippetFile() abort
-  let cword = matchstr(getline('.'), '\v\f+%' . col('.') . 'c')
+  if exists("g:miniSnip_expandpattern")
+    let expandpattern = s:getVar("expandpattern")
+  else
+    let expandpattern = '\v\f+%'
+  endif
+  let cword = matchstr(getline('.'), expandpattern . col('.') . 'c')
+
   let ext = "." . s:getVar("ext")
   let files = globpath(join(s:directories(), ','), cword.ext, 0, 1)
   return len(files) ? files[0] : ""
