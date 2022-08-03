@@ -3,7 +3,6 @@ let s:SNIP = {}
 function! miniSnip#trigger() abort
   let sid = expand("<SID>")
   let ret = ""
-  echom "SID " .sid
 
   if empty(s:SNIP)
     let file = s:findSnippetFile()
