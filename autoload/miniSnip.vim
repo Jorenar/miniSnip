@@ -3,7 +3,7 @@ let s:SNIP = {}
 function! miniSnip#trigger() abort
   let sid = expand("<SID>")
   let ret = ""
-  echom sid
+  echom "SID " .sid
 
   if empty(s:SNIP)
     let file = s:findSnippetFile()
@@ -64,15 +64,11 @@ endfunction
 
 function! s:findSnippetFile() abort
   let expandpattern = s:getVar("expandpattern")
-  " call notify#emitNotification('pattern', expandpattern)
-
-  let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')A
-  " call notify#emitNotification('findSnippetFile - cword', cword)
+  let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')
   echom cword
 
   let ext = "." . s:getVar("ext")
   let files = globpath(join(s:directories(), ','), cword.ext, 0, 1)
-  " call notify#emitNotification('findSnippetFile - files', files[0])
 
   return len(files) ? files[0] : ""
 endfunction
@@ -158,8 +154,6 @@ function! s:insertSnippet() abort
   " Delete snippet key
   let snippet += [ strpart(getline('.'), col('.')) ] " save part after snippet
   let expandpattern = s:getVar("expandpattern")
-  " call notify#emitNotification('s:insertSnippet - expandpattern', expandpattern)
-  " exec 'norm! ?'.expandpattern.'\+'."\<CR>" . '"_D' | call histdel('/', -1)
   exec 'norm! ?'.expandpattern.'\+'."\<CR>" . '"_D' | call histdel('/', -1)
 
   " Get XY position of beginning of the snippet
@@ -321,7 +315,6 @@ endfunction
 function! miniSnip#completeMapping() abort
   let expandpattern = s:getVar("expandpattern")
   let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')
-  " call notify#emitNotification('miniSnip#completeMapping - cword', cword)
   if cword is# ' '
     let cword = ''
   endif
