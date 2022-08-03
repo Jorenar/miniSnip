@@ -3,6 +3,7 @@ let s:SNIP = {}
 function! miniSnip#trigger() abort
   let sid = expand("<SID>")
   let ret = ""
+  echom sid
 
   if empty(s:SNIP)
     let file = s:findSnippetFile()
@@ -62,15 +63,17 @@ function! s:directories() abort
 endfunction
 
 function! s:findSnippetFile() abort
-  if exists("g:miniSnip_expandpattern")
-    let expandpattern = s:getVar("expandpattern")
-  else
-    let expandpattern = '\v\f+%'
-  endif
-  let cword = matchstr(getline('.'), expandpattern . col('.') . 'c')
+  let expandpattern = s:getVar("expandpattern")
+  " call notify#emitNotification('pattern', expandpattern)
+
+  let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')A
+  " call notify#emitNotification('findSnippetFile - cword', cword)
+  echom cword
 
   let ext = "." . s:getVar("ext")
   let files = globpath(join(s:directories(), ','), cword.ext, 0, 1)
+  " call notify#emitNotification('findSnippetFile - files', files[0])
+
   return len(files) ? files[0] : ""
 endfunction
 
@@ -154,7 +157,10 @@ function! s:insertSnippet() abort
 
   " Delete snippet key
   let snippet += [ strpart(getline('.'), col('.')) ] " save part after snippet
-  exec 'norm! ?\f\+'."\<CR>" . '"_D' | call histdel('/', -1)
+  let expandpattern = s:getVar("expandpattern")
+  " call notify#emitNotification('s:insertSnippet - expandpattern', expandpattern)
+  " exec 'norm! ?'.expandpattern.'\+'."\<CR>" . '"_D' | call histdel('/', -1)
+  exec 'norm! ?'.expandpattern.'\+'."\<CR>" . '"_D' | call histdel('/', -1)
 
   " Get XY position of beginning of the snippet
   let s:SNIP.pos.start_xy = getpos('.')
@@ -291,10 +297,11 @@ endfunction
 
 function! miniSnip#completeFunc(findstart, base) abort
   if a:findstart
+    let expandpattern = s:getVar("expandpattern")
     " Locate the start of the word
     let line = getline('.')
     let start = virtcol('.') - 1
-    while start > 0 && line[l:start - 1] =~ '\f'
+    while start > 0 && line[l:start - 1] =~ expandpattern
       let start -= 1
     endwhile
 
@@ -312,7 +319,9 @@ function! miniSnip#completeFunc(findstart, base) abort
 endfunction
 
 function! miniSnip#completeMapping() abort
-  let cword = matchstr(getline('.'), '\v\f+%' . col('.') . 'c')
+  let expandpattern = s:getVar("expandpattern")
+  let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')
+  " call notify#emitNotification('miniSnip#completeMapping - cword', cword)
   if cword is# ' '
     let cword = ''
   endif
