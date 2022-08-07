@@ -276,7 +276,16 @@ If first (second if description was provided) line starts with `$`, then change
 delimiters in this snippet to strings provided between backtics, e.g.: >
     $ `{{` `}}`
     let foo = {{22}}
-<
+
+-------------------------------------------------------------------------------
+                                                   *'g:miniSnip_expandpattern'*
+Default: '\f'
+
+Specifies which letters/charaters to use to take as snippet name.
+This should be specified like character range [a-z] or with character class \f.
+More about character classes in :help \f.
+For example: >
+    let g:miniSnip_expandpattern = '\f'
 
 ===============================================================================
 MISCELLANEOUS                                          *miniSnip-miscellaneous*
@@ -298,5 +307,6 @@ Main differences:
   * one final placeholder ( |g:miniSnip_finalTag| ) instead of final delimiters
   * local snippets
   * named placeholders
+  * changeable character class used to get snippet name
 
  vim:tw=78:ts=4:ft=help:norl:nofen:
