@@ -64,8 +64,6 @@ endfunction
 function! s:findSnippetFile() abort
   let expandpattern = s:getVar("expandpattern")
   let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')
-  echom cword
-
   let ext = "." . s:getVar("ext")
   let files = globpath(join(s:directories(), ','), cword.ext, 0, 1)
   return len(files) ? files[0] : ""
