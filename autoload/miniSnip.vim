@@ -62,8 +62,7 @@ function! s:directories() abort
 endfunction
 
 function! s:findSnippetFile() abort
-  let expandpattern = s:getVar("expandpattern")
-  let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')
+  let cword = matchstr(getline('.'), s:getVar("exppat") . '\v%' . col('.') . 'c')
   let ext = "." . s:getVar("ext")
   let files = globpath(join(s:directories(), ','), cword.ext, 0, 1)
   return len(files) ? files[0] : ""
@@ -149,8 +148,7 @@ function! s:insertSnippet() abort
 
   " Delete snippet key
   let snippet += [ strpart(getline('.'), col('.')) ] " save part after snippet
-  let expandpattern = s:getVar("expandpattern")
-  exec 'norm! ?'.expandpattern.'\+'."\<CR>" . '"_D' | call histdel('/', -1)
+  exec 'norm! ?'. s:getVar("exppat") ."\<CR>" . '"_D' | call histdel('/', -1)
 
   " Get XY position of beginning of the snippet
   let s:SNIP.pos.start_xy = getpos('.')
@@ -287,11 +285,10 @@ endfunction
 
 function! miniSnip#completeFunc(findstart, base) abort
   if a:findstart
-    let expandpattern = s:getVar("expandpattern")
     " Locate the start of the word
     let line = getline('.')
     let start = virtcol('.') - 1
-    while start > 0 && line[l:start - 1] =~ expandpattern
+    while start > 0 && line[l:start - 1] =~ s:getVar("exppat")
       let start -= 1
     endwhile
 
@@ -309,8 +306,7 @@ function! miniSnip#completeFunc(findstart, base) abort
 endfunction
 
 function! miniSnip#completeMapping() abort
-  let expandpattern = s:getVar("expandpattern")
-  let cword = matchstr(getline('.'), '\v' . expandpattern . '+%' . col('.') . 'c')
+  let cword = matchstr(getline('.'), s:getVar("exppat") . '\v%' . col('.') . 'c')
   if cword is# ' '
     let cword = ''
   endif

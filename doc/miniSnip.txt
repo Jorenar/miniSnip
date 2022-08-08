@@ -278,14 +278,14 @@ delimiters in this snippet to strings provided between backtics, e.g.: >
     let foo = {{22}}
 
 -------------------------------------------------------------------------------
-                                                   *'g:miniSnip_expandpattern'*
-Default: '\f'
+                                                          *'g:miniSnip_exppat'*
+Default: '\w+'
 
 Specifies which letters/charaters to use to take as snippet name.
-This should be specified like character range [a-z] or with character class \f.
-More about character classes in :help \f.
+This should be specified like character range [a-z]+ or with character class \w+.
+More about character classes in :help \w.
 For example: >
-    let g:miniSnip_expandpattern = '\f'
+    let g:miniSnip_exppat = '\w+'
 
 ===============================================================================
 MISCELLANEOUS                                          *miniSnip-miscellaneous*
