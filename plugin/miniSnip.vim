@@ -20,6 +20,7 @@ let g:miniSnip_evalmark = get(g:, 'miniSnip_evalmark', '!' )
 let g:miniSnip_finalTag = get(g:, 'miniSnip_finalTag', '+' )
 let g:miniSnip_noskip   = get(g:, 'miniSnip_noskip',   '`' )
 let g:miniSnip_named    = get(g:, 'miniSnip_named',    '@' )
+let g:miniSnip_exppat   = get(g:, 'miniSnip_exppat',   '\w\+')
 
 inoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
 snoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
