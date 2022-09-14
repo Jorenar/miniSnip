@@ -282,8 +282,8 @@ delimiters in this snippet to strings provided between backtics, e.g.: >
 Default: '\w+'
 
 Specifies which letters/charaters to use to take as snippet name.
-This should be specified like character range [a-z]+ or with character class \w+.
-More about character classes in :help \w.
+This should be specified like character range `[a-z]+` or with class `\w+`.
+More about character classes in |/character-classes|.
 For example: >
     let g:miniSnip_exppat = '\w+'
 
@@ -307,6 +307,6 @@ Main differences:
   * one final placeholder ( |g:miniSnip_finalTag| ) instead of final delimiters
   * local snippets
   * named placeholders
-  * changeable character class used to get snippet name
+  * configurable character class used to get snippet name
 
- vim:tw=78:ts=4:ft=help:norl:nofen:
+ vim:tw=78:ts=4:ft=help:norl:nofen:isk+=-

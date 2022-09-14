@@ -128,3 +128,4 @@ Main differences:
   * one final placeholder (`:h g:miniSnip_finalTag`) instead of final delimiters
   * local snippets
   * named placeholders
+  * configurable character class used to get snippet name
