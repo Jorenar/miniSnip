@@ -1,7 +1,11 @@
 let s:SNIP = {}
 
+function! s:SID() abort
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_\zeSID$')
+endfunction
+let s:sid = s:SID()
+
 function! miniSnip#trigger() abort
-  let sid = expand("<SID>")
   let ret = ""
 
   if empty(s:SNIP)
@@ -11,14 +15,14 @@ function! miniSnip#trigger() abort
       return ""
     else
       let s:SNIP = s:Snip(file)
-      let ret .= "\<Esc>:call ".sid."parseFile()\<CR>"
-      let ret .= "\<Esc>:call ".sid."insertSnippet()\<CR>"
+      let ret .= "\<Esc>:call ".s:sid."parseFile()\<CR>"
+      let ret .= "\<Esc>:call ".s:sid."insertSnippet()\<CR>"
     endif
   else
-    let ret .= "\<Esc>:call ".sid."replaceRefs()\<CR>"
+    let ret .= "\<Esc>:call ".s:sid."replaceRefs()\<CR>"
   endif
 
-  return ret."\<Esc>:call ".sid."selectPlaceholder()\<CR>"
+  return ret."\<Esc>:call ".s:sid."selectPlaceholder()\<CR>"
 endfunction
 
 function! miniSnip#clear() abort
