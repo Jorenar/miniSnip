@@ -24,7 +24,7 @@ Filetype-aware snippets are also available. For example, a file called
 |filetype|=java, allowing you to add a `main` for C, `main` for C++ and so on.
 
 You can also use snippets for one filetype in another (e.g. C snippets in C++).
-To do so, use |g:minSnip_extends|
+To do so, use |g:miniSnip_extends|
 
 Features:
   * default values of placeholders (e.g. `<{example}>`)
