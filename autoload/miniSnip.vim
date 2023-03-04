@@ -55,7 +55,7 @@ function! s:directories() abort
 
   for dir in dirs
     for ft in filetypes
-      let d = dir . "/" . ft
+      let d = expand(dir) . "/" . ft
       if isdirectory(d)
         call add(ft_dirs, d)
       endif
