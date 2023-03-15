@@ -8,7 +8,7 @@ let s:sid = s:SID()
 function! miniSnip#trigger() abort
   let ret = ""
 
-  if empty(s:SNIP)
+  if empty(s:SNIP) || s:SNIP.flags.lastPlaceholder
     let file = s:findSnippetFile()
     if empty(file)
       echo "miniSnip: no snippet with that name"
@@ -93,6 +93,7 @@ function! s:Snip(file) abort
         \     eval: s:getVar("evalmark"),
         \   },
         \   flags: #{
+        \     lastPlaceholder: 0,
         \     customDelims: 0,
         \     named: 0,
         \   },
@@ -203,7 +204,7 @@ function! s:replaceRefs() abort
   call setpos('.', pos)
 endfunction
 
-function! s:findPlaceholder(pat) abort
+function! s:findPlaceholderPos(pat) abort
   let pos = getpos('.')
   call setpos('.', s:SNIP.pos.start_xy)
 
@@ -217,11 +218,16 @@ function! s:findPlaceholder(pat) abort
   return getline(sl)[sc-1:ec-1]
 endfunction
 
-function! s:selectPlaceholder() abort
-  let ph = s:findPlaceholder(s:SNIP.patterns.regular)
+function! s:findPlaceholder() abort
+  let ph = s:findPlaceholderPos(s:SNIP.patterns.regular)
   if empty(ph)
-    let ph = s:findPlaceholder(s:SNIP.patterns.final)
+    let ph = s:findPlaceholderPos(s:SNIP.patterns.final)
   endif
+  return ph
+endfunction
+
+function! s:selectPlaceholder() abort
+  let ph = s:findPlaceholder()
 
   if empty(ph)
     call miniSnip#clear()
@@ -266,10 +272,12 @@ function! s:selectPlaceholder() abort
   else " paste the placeholder's default value in and enter select mode on it
     exec 'norm! '. ia . ph . "\<Esc>v" . ph_begin . "|o\<C-g>"
   endif
+
+  if !empty(s:SNIP) && empty(s:findPlaceholder())
+    let s:SNIP.flags.lastPlaceholder = 1
+  endif
 endfunction
 
-
-" --- Completion
 
 function! s:buildComp(_, path) abort
   let l:name = fnamemodify(a:path, ':t:r')
