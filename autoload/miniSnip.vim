@@ -204,30 +204,33 @@ function! s:replaceRefs() abort
   call setpos('.', pos)
 endfunction
 
-function! s:findPlaceholderPos(pat) abort
+function! s:findPlaceholderPos(pat, dry) abort
   let pos = getpos('.')
   call setpos('.', s:SNIP.pos.start_xy)
 
   let [sl, sc] = searchpos(a:pat, 'cw', s:SNIP.pos.end)
-  if !sl " didn't found any placeholders
+  if !sl  " didn't found any placeholders
     call setpos('.', pos)
     return ""
   endif
   let [_, ec] = searchpos(a:pat, 'cnew', s:SNIP.pos.end)
 
+  " Restore cursor position if only checking presence of placeholders
+  if a:dry | call setpos('.', pos) | endif
+
   return getline(sl)[sc-1:ec-1]
 endfunction
 
-function! s:findPlaceholder() abort
-  let ph = s:findPlaceholderPos(s:SNIP.patterns.regular)
+function! s:findPlaceholder(dry) abort
+  let ph = s:findPlaceholderPos(s:SNIP.patterns.regular, a:dry)
   if empty(ph)
-    let ph = s:findPlaceholderPos(s:SNIP.patterns.final)
+    let ph = s:findPlaceholderPos(s:SNIP.patterns.final, a:dry)
   endif
   return ph
 endfunction
 
 function! s:selectPlaceholder() abort
-  let ph = s:findPlaceholder()
+  let ph = s:findPlaceholder(0)
 
   if empty(ph)
     call miniSnip#clear()
@@ -273,7 +276,7 @@ function! s:selectPlaceholder() abort
     exec 'norm! '. ia . ph . "\<Esc>v" . ph_begin . "|o\<C-g>"
   endif
 
-  if !empty(s:SNIP) && empty(s:findPlaceholder())
+  if !empty(s:SNIP) && empty(s:findPlaceholder(1))
     let s:SNIP.flags.lastPlaceholder = 1
   endif
 endfunction
