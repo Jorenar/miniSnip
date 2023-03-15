@@ -158,7 +158,9 @@ function! s:insertSnippet() abort
   let s:SNIP.pos.start_xy = getpos('.')
 
   " Insert snippet
+  let [ fo_old, &l:fo ] = [ &l:fo, "l" ]
   exec "norm! i".join(snippet, "\<CR>\<Esc>i")."\<Esc>kgJ"
+  let &l:fo = fo_old
 
   " Get line the snippet ends at
   let s:SNIP.pos.end = line('.')
