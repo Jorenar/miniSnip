@@ -8,7 +8,7 @@ let s:sid = s:SID()
 function! miniSnip#trigger() abort
   let ret = ""
 
-  if empty(s:SNIP) || s:SNIP.flags.lastPlaceholder
+  if empty(s:SNIP) || empty(s:findPlaceholder(1))
     let file = s:findSnippetFile()
     if empty(file)
       echo "miniSnip: no snippet with that name"
@@ -93,7 +93,6 @@ function! s:Snip(file) abort
         \     eval: s:getVar("evalmark"),
         \   },
         \   flags: #{
-        \     lastPlaceholder: 0,
         \     customDelims: 0,
         \     named: 0,
         \   },
@@ -274,10 +273,6 @@ function! s:selectPlaceholder() abort
     call s:selectPlaceholder()
   else " paste the placeholder's default value in and enter select mode on it
     exec 'norm! '. ia . ph . "\<Esc>v" . ph_begin . "|o\<C-g>"
-  endif
-
-  if !empty(s:SNIP) && empty(s:findPlaceholder(1))
-    let s:SNIP.flags.lastPlaceholder = 1
   endif
 endfunction
 
