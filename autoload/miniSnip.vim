@@ -189,7 +189,6 @@ function! s:replaceRefs() abort
   let txt = escape(s:getInsertedText(), '/\\')
   let pos = getpos('.')
   let s:SNIP.count += 1
-  "undojoin
 
   let cnt_pattern = substitute(s:SNIP.patterns.counted, "COUNT", s:SNIP.count, "")
   let boundries = (s:SNIP.pos.start).','.(s:SNIP.pos.end)
