@@ -307,11 +307,15 @@ function! s:selectPlaceholder() abort
 
   if empty(ph) " the placeholder was empty, so just enter insert mode directly
     exec 'norm! '. ia . phs_sel . "\<Esc>v" . ph_begin . "|o\<C-g>"
-  elseif canSkip || s:SNIP.flags.noskip
+  elseif canSkip
     " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
     exec 'norm! ' . ia . ph
     call s:replaceRefs()
     call s:selectPlaceholder()
+  elseif s:SNIP.flags.noskip
+    " For noskip
+    call s:replaceRefs()
+    exec 'norm! '. ia . ph . "\<Esc>v" . ph_begin . "|o\<C-g>"
   else " paste the placeholder's default value in and enter select mode on it
     exec 'norm! '. ia . phs_sel . "\<Esc>v" . ph_begin . "|o\<C-g>"
   endif
