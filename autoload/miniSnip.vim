@@ -95,6 +95,7 @@ function! s:Snip(file) abort
         \   flags: #{
         \     customDelims: 0,
         \     named: 0,
+        \     noskip: 0,
         \   },
         \   temp: #{
         \     ph_begin_pos: [],
@@ -170,6 +171,7 @@ function! s:evaluate(str) abort
   if a:str =~ '\V\^' . s:SNIP.marks.eval
     return eval(a:str[1:])
   elseif a:str =~ '\V\^' . (s:SNIP.marks.noskip) . (s:SNIP.marks.eval)
+    let s:SNIP.flags.noskip = 1
     return eval(a:str[2:])
   endif
   return a:str
@@ -185,15 +187,55 @@ function! s:getInsertedText() abort
   return join(lines, "\n")
 endfunction
 
+func! s:isInLine() abort
+  let [l:line_start, l:column_start] = s:SNIP.temp.ph_begin_pos
+  let [l:line_end, l:column_end] = getpos('.')[1:2]
+  if l:line_end != l:line_start || l:column_end < l:column_start
+    return 0
+  endif
+  return 1
+endf
+
+func! s:getRefMarkCount() abort
+  let l:lines = getline(s:SNIP.pos.start, s:SNIP.pos.end)
+  let l:str = join(l:lines, "")
+  let l:re = s:SNIP.marks.op.'\~\d'.s:SNIP.marks.ed
+  let l:start = 0
+  let l:end = len(l:str)
+  let l:ret = 66
+  let l:oplen = len(s:SNIP.marks.op)
+  while 1
+    let l:col = match(l:str, l:re, l:start)
+    if l:col < 0
+      break
+    endif
+    let l:start = l:start + l:col + l:oplen + 1
+    if l:start >= l:end
+      break
+    endif
+    let l:num = str2nr(l:str[l:start])
+    if l:num < l:ret
+      let l:ret = l:num
+    endif
+  endwhile
+  return l:ret
+endf
+
 function! s:replaceRefs() abort
   let txt = escape(s:getInsertedText(), '/\\')
+  if (!s:isInLine() || txt =~ s:SNIP.marks.op)
+    return
+  endif
   let pos = getpos('.')
-  let s:SNIP.count += 1
+  let s:SNIP.count = s:getRefMarkCount()
 
   let cnt_pattern = substitute(s:SNIP.patterns.counted, "COUNT", s:SNIP.count, "")
   let boundries = (s:SNIP.pos.start).','.(s:SNIP.pos.end)
-
-  silent! exec boundries.'s/'.cnt_pattern.'/'.txt.'/g'
+  if !s:SNIP.flags.noskip " setcount not need run when in noskip
+    silent! exec boundries.'s/'.cnt_pattern.'/'.txt.'/g'
+  else
+    let s:SNIP.flags.noskip = 0
+  endif
   if s:SNIP.flags.named
     silent! exec boundries.'s/'.s:SNIP.patterns.named.'/'.txt.'/g'
     let s:SNIP.flags.named = 0
@@ -242,6 +284,8 @@ function! s:selectPlaceholder() abort
   " Delete placeholder
   exec 'norm! "_d'.strchars(ph).'l'
 
+  " phs = op.str.ed is v_select region for trigger
+  let phs = ph 
   let op = s:SNIP.marks.op
   let ed = s:SNIP.marks.ed
   let ph = ph[strchars(op) : -strchars(ed)-1]
@@ -264,14 +308,18 @@ function! s:selectPlaceholder() abort
   let ia = virtcol('.') == ph_begin - 1 ? 'a' : 'i'
 
   if empty(ph) " the placeholder was empty, so just enter insert mode directly
-    call feedkeys(ia, 'n')
+    exec 'norm! '. ia . phs . "\<Esc>v" . ph_begin . "|o\<C-g>"
   elseif canSkip
     " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
     exec 'norm! ' . ia . ph
     call s:replaceRefs()
     call s:selectPlaceholder()
-  else " paste the placeholder's default value in and enter select mode on it
+  elseif s:SNIP.flags.noskip
+    " For noskip
     exec 'norm! '. ia . ph . "\<Esc>v" . ph_begin . "|o\<C-g>"
+    call s:replaceRefs()
+  else " paste the placeholder's default value in and enter select mode on it
+    exec 'norm! '. ia . phs . "\<Esc>v" . ph_begin . "|o\<C-g>"
   endif
 endfunction
 
