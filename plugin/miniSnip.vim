@@ -24,7 +24,8 @@ let g:miniSnip_exppat   = get(g:, 'miniSnip_exppat',   '\w\+')
 
 inoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
 snoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
-nnoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#clear()
+nnoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#trigger()
+"nnoremap <silent> <script> <expr> <Plug>(miniSnip) miniSnip#clear()
 
 if !empty(g:miniSnip_trigger)
   execute "imap <unique> ".g:miniSnip_trigger." <Plug>(miniSnip)"
