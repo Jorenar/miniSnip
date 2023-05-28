@@ -175,6 +175,25 @@ function! s:evaluate(str) abort
   return a:str
 endfunction
 
+func! s:getFlagSortNum(flag='') abort
+  let l:lines = getline(s:SNIP.pos.start, s:SNIP.pos.end)
+  let l:str = join(l:lines, "")
+  let l:re = '\V'.s:SNIP.marks.op.a:flag.'\d'.s:SNIP.marks.ed
+  let l:start = 0
+  let l:end = len(l:str)
+  let l:ret = 66
+  let l:oplen = len(s:SNIP.marks.op)
+  while 1
+    let l:col = match(l:str, l:re, l:start)
+    if l:col < 0 | break | endif
+    let l:start = l:start + l:col + l:oplen + 1
+    if l:start >= l:end | break | endif
+    let l:num = str2nr(l:str[l:start])
+    if l:num < l:ret | let l:ret = l:num | endif
+  endwhile
+  return l:ret
+endf
+
 function! s:getInsertedText() abort
   let [line_start, column_start] = s:SNIP.temp.ph_begin_pos
   let [line_end, column_end] = getpos('.')[1:2]
@@ -187,8 +206,12 @@ endfunction
 
 function! s:replaceRefs() abort
   let txt = escape(s:getInsertedText(), '/\\')
+  let txt = substitute(txt, '^\s*\(.*\)', '\1', '')
+  if txt =~ s:SNIP.marks.op || txt == s:SNIP.marks.op[0] || strchars(txt) < 1
+    return
+  endif
   let pos = getpos('.')
-  let s:SNIP.count += 1
+  let s:SNIP.count = s:getFlagSortNum(s:SNIP.marks.ref)
 
   let cnt_pattern = substitute(s:SNIP.patterns.counted, "COUNT", s:SNIP.count, "")
   let boundries = (s:SNIP.pos.start).','.(s:SNIP.pos.end)
@@ -259,12 +282,12 @@ function! s:selectPlaceholder() abort
 
   let canSkip = ph =~ '\V\^' . s:SNIP.marks.eval
   let ph = s:evaluate(ph)
-
+  let phs = s:SNIP.marks.op . ph . s:SNIP.marks.ed
   " Choose 'append' if placeholder is the last element in a line
   let ia = virtcol('.') == ph_begin - 1 ? 'a' : 'i'
 
   if empty(ph) " the placeholder was empty, so just enter insert mode directly
-    call feedkeys(ia, 'n')
+    exec 'norm! '. ia . phs . "\<Esc>v" . ph_begin . "|o\<C-g>"
   elseif canSkip
     " Placeholder was evaluated and isn't marked 'noskip', so replace references and go to next
     exec 'norm! ' . ia . ph
