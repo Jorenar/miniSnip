@@ -282,6 +282,7 @@ function! s:selectPlaceholder() abort
 
   let canSkip = ph =~ '\V\^' . s:SNIP.marks.eval
   let ph = s:evaluate(ph)
+  let ph = substitute(ph, '^\s*\(.*\)', '\1', '')
   let phs = s:SNIP.marks.op . ph . s:SNIP.marks.ed
   " Choose 'append' if placeholder is the last element in a line
   let ia = virtcol('.') == ph_begin - 1 ? 'a' : 'i'
