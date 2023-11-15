@@ -166,7 +166,8 @@ function! s:insertSnippet() abort
   " Insert snippet
   let [ fo_old, &l:fo ] = [ &l:fo, "l" ]
   let [ ve_old, lve_old, &ve, &l:ve ] = [ &ve, &l:ve, '', '' ]
-  let [ paste_old, &paste ] = [ &paste, 1 ]
+  let [ et_save, paste_old, &paste ] = [ &l:et, &paste, 1 ]
+  let &l:expandtab = et_save
   exec "norm! i".join(snippet, "\<CR>\<Esc>i")."\<Esc>kgJ"
   let [ &l:fo, &ve, &l:ve, &paste ] = [ fo_old, ve_old, lve_old, paste_old ]
 
