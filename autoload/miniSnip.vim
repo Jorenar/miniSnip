@@ -9,15 +9,15 @@ function! miniSnip#trigger() abort
   let ret = ""
 
   if empty(s:SNIP) || empty(s:findPlaceholder(1))
-    let file = s:findSnippetFile()
-    if empty(file)
-      echo "miniSnip: no snippet with that name"
+    let cword = s:getCword()
+    let s:SNIP = s:Snip(cword)
+    if empty(s:SNIP.file)
+      let s:SNIP = {}
+      echo "miniSnip: no snippet with key '".cword."'"
       return ""
-    else
-      let s:SNIP = s:Snip(file)
-      let ret .= "\<Esc>:call ".s:sid."parseFile()\<CR>"
-      let ret .= "\<Esc>:call ".s:sid."insertSnippet()\<CR>"
     endif
+    let ret .= "\<Esc>:call ".s:sid."parseFile()\<CR>"
+    let ret .= "\<Esc>:call ".s:sid."insertSnippet()\<CR>"
   else
     let ret .= "\<Esc>:call ".s:sid."replaceRefs()\<CR>"
   endif
@@ -65,16 +65,20 @@ function! s:directories() abort
   return ft_dirs
 endfunction
 
-function! s:findSnippetFile() abort
-  let cword = matchstr(getline('.'), s:getVar("exppat") . '\v%' . col('.') . 'c')
+function! s:getCword() abort
+  return matchstr(getline('.'), s:getVar("exppat") . '\v%' . col('.') . 'c')
+endfunction
+
+function! s:findSnippetFile(cword) abort
   let ext = "." . s:getVar("ext")
-  let files = globpath(join(s:directories(), ','), cword.ext, 0, 1)
+  let files = globpath(join(s:directories(), ','), a:cword.ext, 0, 1)
   return len(files) ? files[0] : ""
 endfunction
 
-function! s:Snip(file) abort
+function! s:Snip(cword) abort
   return #{
-        \   file: a:file,
+        \   key: a:cword,
+        \   file: s:findSnippetFile(a:cword),
         \   count: 0,
         \   pos: #{
         \     start: line('.'),
@@ -152,7 +156,8 @@ function! s:insertSnippet() abort
 
   " Delete snippet key
   let snippet += [ strpart(getline('.'), col('.')) ] " save part after snippet
-  exec 'norm! l?\%'. line('.').'l' . s:getVar("exppat") ."\<CR>" . '"_D'
+  if len(s:SNIP.key) == 1 | exec "norm! l" | endif
+  exec 'norm! ?\%'. line('.').'l' . s:getVar("exppat") ."\<CR>" . '"_D'
   call histdel('/', -1)
 
   " Get XY position of beginning of the snippet
