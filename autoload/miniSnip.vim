@@ -147,6 +147,25 @@ function! s:parseFile() abort
   let s:SNIP.snippet = file
 endfunction
 
+function! s:setPseudoPaste(...) abort
+  let s = get(a:, 1, {})
+
+  if !empty(s)
+    let [ &l:fo ] = [ s.fo ]
+    let [ &ve, &l:ve ] = [ s.ve, s.lve ]
+    let [ &l:ai, &l:cin, &l:si, &l:inde ] = [ s.ai, s.cin, s.si, s.inde ]
+    return
+  endif
+
+  let [ s.fo,   &l:fo   ] = [ &l:fo,  "l" ]
+  let [ s.ai,   &l:ai   ] = [ &l:ai,   0  ]
+  let [ s.cin,  &l:cin  ] = [ &l:cin,  0  ]
+  let [ s.si,   &l:si   ] = [ &l:si,   0  ]
+  let [ s.inde, &l:inde ] = [ &l:inde, "" ]
+  let [ s.ve, s.lve, &ve, &l:ve ] = [ &ve, &l:ve, '', '' ]
+  return s
+endfunction
+
 function! s:insertSnippet() abort
   let snippet = s:SNIP.snippet
 
@@ -164,12 +183,9 @@ function! s:insertSnippet() abort
   let s:SNIP.pos.start_xy = getpos('.')
 
   " Insert snippet
-  let [ fo_old, &l:fo ] = [ &l:fo, "l" ]
-  let [ ve_old, lve_old, &ve, &l:ve ] = [ &ve, &l:ve, '', '' ]
-  let [ et_save, paste_old, &paste ] = [ &l:et, &paste, 1 ]
-  let &l:expandtab = et_save
+  let opts_old = s:setPseudoPaste()
   exec "norm! i".join(snippet, "\<CR>\<Esc>i")."\<Esc>kgJ"
-  let [ &l:fo, &ve, &l:ve, &paste ] = [ fo_old, ve_old, lve_old, paste_old ]
+  call s:setPseudoPaste(opts_old)
 
   " Get line the snippet ends at
   let s:SNIP.pos.end = line('.')
