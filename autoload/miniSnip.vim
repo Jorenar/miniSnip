@@ -9,15 +9,15 @@ function! miniSnip#trigger() abort
   let ret = ""
 
   if empty(s:SNIP) || empty(s:findPlaceholder(1))
-    let file = s:findSnippetFile()
-    if empty(file)
-      echo "miniSnip: no snippet with that name"
+    let cword = s:getCword()
+    let s:SNIP = s:Snip(cword)
+    if empty(s:SNIP.file)
+      let s:SNIP = {}
+      echo "miniSnip: no snippet with key '".cword."'"
       return ""
-    else
-      let s:SNIP = s:Snip(file)
-      let ret .= "\<Esc>:call ".s:sid."parseFile()\<CR>"
-      let ret .= "\<Esc>:call ".s:sid."insertSnippet()\<CR>"
     endif
+    let ret .= "\<Esc>:call ".s:sid."parseFile()\<CR>"
+    let ret .= "\<Esc>:call ".s:sid."insertSnippet()\<CR>"
   else
     let ret .= "\<Esc>:call ".s:sid."replaceRefs()\<CR>"
   endif
@@ -65,16 +65,20 @@ function! s:directories() abort
   return ft_dirs
 endfunction
 
-function! s:findSnippetFile() abort
-  let cword = matchstr(getline('.'), s:getVar("exppat") . '\v%' . col('.') . 'c')
+function! s:getCword() abort
+  return matchstr(getline('.'), s:getVar("exppat") . '\v%' . col('.') . 'c')
+endfunction
+
+function! s:findSnippetFile(cword) abort
   let ext = "." . s:getVar("ext")
-  let files = globpath(join(s:directories(), ','), cword.ext, 0, 1)
+  let files = globpath(join(s:directories(), ','), a:cword.ext, 0, 1)
   return len(files) ? files[0] : ""
 endfunction
 
-function! s:Snip(file) abort
+function! s:Snip(cword) abort
   return #{
-        \   file: a:file,
+        \   key: a:cword,
+        \   file: s:findSnippetFile(a:cword),
         \   count: 0,
         \   pos: #{
         \     start: line('.'),
@@ -143,6 +147,25 @@ function! s:parseFile() abort
   let s:SNIP.snippet = file
 endfunction
 
+function! s:setPseudoPaste(...) abort
+  let s = get(a:, 1, {})
+
+  if !empty(s)
+    let [ &l:fo ] = [ s.fo ]
+    let [ &ve, &l:ve ] = [ s.ve, s.lve ]
+    let [ &l:ai, &l:cin, &l:si, &l:inde ] = [ s.ai, s.cin, s.si, s.inde ]
+    return
+  endif
+
+  let [ s.fo,   &l:fo   ] = [ &l:fo,  "l" ]
+  let [ s.ai,   &l:ai   ] = [ &l:ai,   0  ]
+  let [ s.cin,  &l:cin  ] = [ &l:cin,  0  ]
+  let [ s.si,   &l:si   ] = [ &l:si,   0  ]
+  let [ s.inde, &l:inde ] = [ &l:inde, "" ]
+  let [ s.ve, s.lve, &ve, &l:ve ] = [ &ve, &l:ve, '', '' ]
+  return s
+endfunction
+
 function! s:insertSnippet() abort
   let snippet = s:SNIP.snippet
 
@@ -152,15 +175,17 @@ function! s:insertSnippet() abort
 
   " Delete snippet key
   let snippet += [ strpart(getline('.'), col('.')) ] " save part after snippet
-  exec 'norm! ?'. s:getVar("exppat") ."\<CR>" . '"_D' | call histdel('/', -1)
+  if len(s:SNIP.key) == 1 | exec "norm! l" | endif
+  exec 'norm! ?\%'. line('.').'l' . s:getVar("exppat") ."\<CR>" . '"_D'
+  call histdel('/', -1)
 
   " Get XY position of beginning of the snippet
   let s:SNIP.pos.start_xy = getpos('.')
 
   " Insert snippet
-  let [ fo_old, &l:fo ] = [ &l:fo, "l" ]
+  let opts_old = s:setPseudoPaste()
   exec "norm! i".join(snippet, "\<CR>\<Esc>i")."\<Esc>kgJ"
-  let &l:fo = fo_old
+  call s:setPseudoPaste(opts_old)
 
   " Get line the snippet ends at
   let s:SNIP.pos.end = line('.')
