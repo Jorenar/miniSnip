@@ -218,11 +218,13 @@ function! s:replaceRefs() abort
   let cnt_pattern = substitute(s:SNIP.patterns.counted, "COUNT", s:SNIP.count, "")
   let boundries = (s:SNIP.pos.start).','.(s:SNIP.pos.end)
 
+  let [ magic_old, &magic ] = [ &magic, 0 ]
   silent! exec boundries.'s/'.cnt_pattern.'/'.txt.'/g'
   if s:SNIP.flags.named
     silent! exec boundries.'s/'.s:SNIP.patterns.named.'/'.txt.'/g'
     let s:SNIP.flags.named = 0
   endif
+  let &magic = magic_old
 
   call setpos('.', pos)
 endfunction
