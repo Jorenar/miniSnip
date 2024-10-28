@@ -176,7 +176,7 @@ function! s:insertSnippet() abort
   " Delete snippet key
   let snippet += [ strpart(getline('.'), col('.')) ] " save part after snippet
   if len(s:SNIP.key) == 1
-    exec 'norm! "_x'
+    exec 'norm! "_D'
   else
     exec 'norm! ?\%'. line('.').'l' . s:getVar("exppat") ."\<CR>" . '"_D'
     call histdel('/', -1)
