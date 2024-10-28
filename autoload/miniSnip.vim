@@ -175,9 +175,12 @@ function! s:insertSnippet() abort
 
   " Delete snippet key
   let snippet += [ strpart(getline('.'), col('.')) ] " save part after snippet
-  if len(s:SNIP.key) == 1 | exec "norm! l" | endif
-  exec 'norm! ?\%'. line('.').'l' . s:getVar("exppat") ."\<CR>" . '"_D'
-  call histdel('/', -1)
+  if len(s:SNIP.key) == 1
+    exec 'norm! "_x'
+  else
+    exec 'norm! ?\%'. line('.').'l' . s:getVar("exppat") ."\<CR>" . '"_D'
+    call histdel('/', -1)
+  endif
 
   " Get XY position of beginning of the snippet
   let s:SNIP.pos.start_xy = getpos('.')
