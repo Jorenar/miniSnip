@@ -22,7 +22,14 @@ function! miniSnip#trigger() abort
     let ret .= "\<Esc>:call ".s:sid."replaceRefs()\<CR>"
   endif
 
-  return ret."\<Esc>:call ".s:sid."selectPlaceholder()\<CR>"
+  let ret .= "\<Esc>:call ".s:sid."selectPlaceholder()\<CR>"
+
+  if pumvisible()
+    call timer_start(50, {-> feedkeys(ret)})
+    return "\<C-y>"
+  endif
+
+  return ret
 endfunction
 
 function! miniSnip#clear() abort
