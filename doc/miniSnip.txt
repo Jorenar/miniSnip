@@ -1,6 +1,6 @@
 *miniSnip*  *miniSnip.txt*  lightweight snippets
 
-Author:  Jorengarenar <https://joren.ga>
+Author:  Jorenar
 License: MIT
 
 1. Overview                    |miniSnip-overview|
@@ -54,7 +54,7 @@ EXAMPLES                                                    *miniSnip-examples*
     <html lang="{{en}}">
     <head>
       <meta charset="UTF-8">
-      <title>{{Joren}}</title>
+      <title>{{Jorenar}}</title>
       <meta name="author" content="{{~1}}">
       <meta name="description" content="{{}}">
       <meta name="keywords" content="{{example}}">

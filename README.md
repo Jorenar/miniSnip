@@ -15,25 +15,19 @@
 
 Use your favourite plugin manager to install miniSnip:
 
-#### [minPlug](https://github.com/Jorengarenar/minPlug):
-```vim
-MinPlug Jorengarenar/miniSnip
+#### Vim's packages
+```bash
+git clone https://codeberg.org/Jorenar/miniSnip.git ~/.vim/pack/plugins/start/miniSnip
 ```
 
 #### [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
-Plug 'Jorengarenar/miniSnip'
-```
-
-#### Vim's packages
-```bash
-cd ~/.vim/pack/plugins/start
-git clone git://github.com/Jorengarenar/miniSnip.git
+Plug 'https://codeberg.org/Jorenar/miniSnip.git'
 ```
 
 #### [NeoBundle](https://github.com/Shougo/neobundle.vim)
 ```vim
-NeoBundle 'Jorengarenar/miniSnip'
+NeoBundle 'https://codeberg.org/Jorenar/miniSnip.git'
 ```
 
 ## Usage
@@ -78,7 +72,7 @@ $ `{{` `}}`
 <html lang="{{en}}">
 <head>
   <meta charset="UTF-8">
-  <title>{{Joren}}</title>
+  <title>{{Jorenar}}</title>
   <meta name="author" content="{{~1}}">
   <meta name="description" content="{{}}">
   <meta name="keywords" content="{{example}}">

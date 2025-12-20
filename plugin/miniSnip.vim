@@ -1,5 +1,5 @@
 " miniSnip - lightweight and minimal snippet plugin
-" Maintainer:  Jorengarenar <https://joren.ga>
+" Author: Jorenar
 
 if exists('g:loaded_miniSnip') | finish | endif
 let s:cpo_save = &cpo | set cpo&vim
